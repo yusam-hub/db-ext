@@ -2,8 +2,6 @@
 
 namespace YusamHub\DbExt\Tests;
 
-use YusamHub\DbExt\PdoExtMigrations;
-
 class PdoExtTest extends BaseTestCase
 {
     public function testConnection()
