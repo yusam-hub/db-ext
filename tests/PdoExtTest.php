@@ -49,8 +49,6 @@ class PdoExtTest extends BaseTestCase
             ':str' => $value
         ]),'str');
 
-        var_dump($value, $str);
-
         $this->assertTrue($str === "'test");
     }
 }
