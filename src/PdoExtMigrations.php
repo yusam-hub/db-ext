@@ -2,15 +2,15 @@
 
 namespace YusamHub\DbExt;
 
-class MySqlPdoExtMigrations extends Migrations
+class PdoExtMigrations extends Migrations
 {
-    protected MySqlPdoExt $pdoExt;
+    protected PdoExt $pdoExt;
 
     /**
-     * @param MySqlPdoExt $pdoExt
+     * @param PdoExt $pdoExt
      * @param string $migrationDir
      */
-    public function __construct(MySqlPdoExt $pdoExt, string $migrationDir)
+    public function __construct(PdoExt $pdoExt, string $migrationDir)
     {
         $this->pdoExt = $pdoExt;
         parent::__construct($migrationDir);

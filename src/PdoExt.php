@@ -2,9 +2,14 @@
 
 namespace YusamHub\DbExt;
 
-class MySqlPdoExt
+use http\Exception\RuntimeException;
+use YusamHub\DbExt\Traits\MySqlPdoExtTrait;
+
+class PdoExt
 {
-    static public bool $DEBUG = false;
+    use MySqlPdoExtTrait;
+
+    public bool $isDebugging = false;
     const COMMAND_INSERT = 'INSERT';
     const COMMAND_INSERT_IGNORE = 'INSERT IGNORE';
     const COMMAND_REPLACE = 'REPLACE';
@@ -43,7 +48,7 @@ class MySqlPdoExt
      */
     protected function debugLog(string $sql, array $bindings): void
     {
-        if (!self::$DEBUG) return;
+        if (!$this->isDebugging) return;
 
         echo $sql;
         if (!empty($bindings)) {
@@ -136,104 +141,70 @@ class MySqlPdoExt
     }
 
     /**
+     * @param string|null $value
+     * @param bool $trim
      * @return string
      */
-    public function selectDateTime(): string
+    public function escape(?string $value, bool $trim = true): string
     {
-        return $this->fetchOneColumn("SELECT NOW() AS dt", 'dt');
+        $value = strval($value);
+
+        if ($trim) {
+            $value = trim($value);
+        }
+
+        return str_replace("'","\'",$value);
     }
 
     /**
-     * @param string $value
-     * @return bool
+     * @return int
      */
-    public function isDateTime(string $value): bool
+    public function lastInsertId(): int
     {
-        return preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $value);
+        return $this->pdo->lastInsertId();
     }
 
     /**
-     * @param string $value
-     * @return bool
+     * @return int
      */
-    public function isDate(string $value): bool
+    public function affectedRows(): int
     {
-        return preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', $value);
+        return $this->pdoStatement->rowCount();
     }
 
     /**
      * @param string $sql
      * @param array $bindings
-     * @return int
+     * @return bool
      */
-    public function exec(string $sql,
-                  array $bindings = []): int
+    public function exec(string $sql, array $bindings = []): bool
     {
         $this->debugLog($sql, $bindings);
 
         $this->pdoStatement = $this->pdo->prepare($sql);
 
         if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            return $this->pdoStatement->rowCount();
+            return true;
         }
 
-        return 0;
-    }
-
-    /**
-     * @param string $tableName
-     * @param array $fieldValues
-     * @param string|array|null $whereStatementOrWhereArray
-     * @return int
-     */
-    public function update(string $tableName, array $fieldValues, string|array|null $whereStatementOrWhereArray = null): int
-    {
-        $bindings = [];
-        $sets = [];
-        foreach ($fieldValues as $field => $value) {
-            $sets[] = $field . ' = :' . $field;
-            $bindings[':'.$field] = $value;
-        }
-
-        $where = [];
-        if (is_array($whereStatementOrWhereArray)) {
-            foreach ($whereStatementOrWhereArray as $field => $value) {
-                $where[] = $field . ' = :' . $field;
-                $bindings[':'.$field] = $value;
-            }
-        } elseif (is_string($whereStatementOrWhereArray)) {
-            $where[] = $whereStatementOrWhereArray;
-        }
-
-        $sql = 'UPDATE ' . $tableName . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
-
-        $this->debugLog($sql, $bindings);
-
-        $this->pdoStatement = $this->pdo->prepare($sql);
-
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            return $this->pdoStatement->rowCount();
-        }
-
-        return 0;
+        return false;
     }
 
     /**
      * @param string $tableName
      * @param array $fieldValues
      * @param string $command
-     * @param bool $returnLastInsertId
-     * @return int
+     * @return bool
      */
-    public function insert(string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT, bool $returnLastInsertId = false): int
+    public function insert(string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT): bool
     {
         $bindings = [];
         $fields = [];
         $values = [];
         foreach ($fieldValues as $field => $value) {
-            $fields[] = $field;
-            $values[] = ":" . $field;
-            $bindings[':'.$field] = $value;
+            $fields[] = sprintf("`%s`",$field);
+            $values[] = "?";
+            $bindings[] = $value;
         }
 
         $sql = $command . ' INTO ' . $tableName . '  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
@@ -243,13 +214,10 @@ class MySqlPdoExt
         $this->pdoStatement = $this->pdo->prepare($sql);
 
         if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            if ($returnLastInsertId) {
-                return $this->pdo->lastInsertId();
-            }
-            return 1;
+            return true;
         }
 
-        return 0;
+        return false;
     }
 
     /**
@@ -257,7 +225,18 @@ class MySqlPdoExt
      * @param array $fieldValues
      * @return int
      */
-    public function replace(string $tableName, array $fieldValues): int
+    public function insertReturnId(string $tableName, array $fieldValues): int
+    {
+        $this->insert($tableName, $fieldValues);
+        return $this->lastInsertId();
+    }
+
+    /**
+     * @param string $tableName
+     * @param array $fieldValues
+     * @return bool
+     */
+    public function replace(string $tableName, array $fieldValues): bool
     {
         return $this->insert($tableName, $fieldValues, self::COMMAND_REPLACE);
     }
@@ -265,34 +244,81 @@ class MySqlPdoExt
 
     /**
      * @param string $tableName
+     * @param array $fieldValues
      * @param string|array|null $whereStatementOrWhereArray
-     * @return int
+     * @param int|null $limit
+     * @return bool
      */
-    public function delete(string $tableName, string|array|null $whereStatementOrWhereArray = null): int
+    public function update(string $tableName, array $fieldValues, string|array|null $whereStatementOrWhereArray = null, ?int $limit = null): bool
     {
         $bindings = [];
+        $sets = [];
+        foreach ($fieldValues as $field => $value) {
+            $sets[] = sprintf("`%s`",$field) . ' = ?';
+            $bindings[] = $value;
+        }
 
         $where = [];
         if (is_array($whereStatementOrWhereArray)) {
             foreach ($whereStatementOrWhereArray as $field => $value) {
-                $where[] = $field . ' = :' . $field;
-                $bindings[':'.$field] = $value;
+                $where[] = sprintf("`%s`",$field) . ' = ?';
+                $bindings[] = $value;
             }
         } elseif (is_string($whereStatementOrWhereArray)) {
             $where[] = $whereStatementOrWhereArray;
         }
 
-        $sql = 'DELETE FROM ' . $tableName . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        $sql = 'UPDATE ' . $tableName . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        if (is_int($limit)) {
+            $sql .= " LIMIT " . $limit;
+        }
 
         $this->debugLog($sql, $bindings);
 
         $this->pdoStatement = $this->pdo->prepare($sql);
 
         if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            return $this->pdoStatement->rowCount();
+            return true;
         }
 
-        return 0;
+        return false;
+    }
+
+
+    /**
+     * @param string $tableName
+     * @param string|array|null $whereStatementOrWhereArray
+     * @param int|null $limit
+     * @return bool
+     */
+    public function delete(string $tableName, string|array|null $whereStatementOrWhereArray = null, ?int $limit = null): bool
+    {
+        $bindings = [];
+
+        $where = [];
+        if (is_array($whereStatementOrWhereArray)) {
+            foreach ($whereStatementOrWhereArray as $field => $value) {
+                $where[] = sprintf("`%s`",$field) . ' = ?';
+                $bindings[] = $value;
+            }
+        } elseif (is_string($whereStatementOrWhereArray)) {
+            $where[] = $whereStatementOrWhereArray;
+        }
+
+        $sql = 'DELETE FROM ' . $tableName . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        if (is_int($limit)) {
+            $sql .= " LIMIT " . $limit;
+        }
+
+        $this->debugLog($sql, $bindings);
+
+        $this->pdoStatement = $this->pdo->prepare($sql);
+
+        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -339,30 +365,4 @@ class MySqlPdoExt
         return $success;
     }
 
-    /**
-     * @param string $name
-     * @param int $timeout
-     */
-    public function lockBegin(string $name, int $timeout = 10): void
-    {
-        $this->exec("SELECT GET_LOCK('" . md5($name) . "'," . $timeout . ")");
-    }
-
-    /**
-     * @param string $name
-     */
-    public function lockEnd(string $name): void
-    {
-        $this->exec("SELECT RELEASE_LOCK('" .  md5($name) . "')");
-    }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function isLocked(string $name): bool
-    {
-        $isFreeLock = $this->fetchOneColumn("SELECT IS_FREE_LOCK('" .  md5($name) . "') as isFreeLock", 'isFreeLock');
-        return !is_null($isFreeLock) && !intval($isFreeLock);
-    }
 }

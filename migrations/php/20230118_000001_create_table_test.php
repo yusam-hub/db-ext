@@ -4,8 +4,10 @@ return new class {
     public function getQuery(): string
     {
         return <<<MYSQL
+DROP TABLE IF EXISTS `test`;
+
 CREATE TABLE IF NOT EXISTS `test` (
-    `id` bigint(20) NOT NULL,
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `title` varchar(32) DEFAULT NULL,
     `desc` varchar(255) DEFAULT NULL,
     `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

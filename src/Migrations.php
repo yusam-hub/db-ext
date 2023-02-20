@@ -53,13 +53,14 @@ abstract class Migrations
                             $this->query($query);
                             echo PHP_EOL;
                             echo sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query) . PHP_EOL;
-                            file_put_contents($this->migrationFile, basename($file) . PHP_EOL, FILE_APPEND);
+
                         } catch (\Throwable $e) {
                             echo sprintf('%s. %s - FAIL in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, basename($file)) . PHP_EOL;
                             return;
                         }
                     }
                 }
+                file_put_contents($this->migrationFile, basename($file) . PHP_EOL, FILE_APPEND);
             }
         }
         echo sprintf('%s', 'MIGRATION SUCCESS') . PHP_EOL;
