@@ -2,7 +2,6 @@
 
 namespace YusamHub\DbExt;
 
-use http\Exception\RuntimeException;
 use YusamHub\DbExt\Traits\MySqlPdoExtTrait;
 
 class PdoExt
@@ -322,6 +321,30 @@ class PdoExt
     }
 
     /**
+     * @return bool
+     */
+    public function beginTransaction(): bool
+    {
+        return $this->pdo->beginTransaction();
+    }
+
+    /**
+     * @return bool
+     */
+    public function commitTransaction(): bool
+    {
+        return $this->pdo->commit();
+    }
+
+    /**
+     * @return bool
+     */
+    public function rollBackTransaction(): bool
+    {
+        return $this->pdo->rollBack();
+    }
+
+    /**
      * @param \Closure $callback
      * @param bool $handleRollBackException
      * @return bool
@@ -329,7 +352,7 @@ class PdoExt
      */
     public function withTransaction(\Closure $callback, bool $handleRollBackException): bool
     {
-        $this->pdo->beginTransaction();
+        $this->beginTransaction();
 
         try {
 
@@ -352,11 +375,11 @@ class PdoExt
 
             if ($success) {
 
-                $this->pdo->commit();
+                $this->commitTransaction();
 
             } else {
 
-                $this->pdo->rollBack();
+                $this->rollBackTransaction();
 
             }
 
