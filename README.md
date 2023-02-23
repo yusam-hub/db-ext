@@ -1,3 +1,8 @@
-## yusam-hub/db-ext
+#### yusam-hub/db-ext
 
-    "php": "^8.1",
+    "php": "^7.4|^8.1"
+
+#### tests
+    
+    php migrate
+    sh phpinit

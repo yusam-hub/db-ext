@@ -27,3 +27,22 @@ if (! function_exists('db_ext_mysql_pdo_ext_create_from_config')) {
     }
 
 }
+
+if (! function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle): bool
+    {
+        $length = strlen( $needle );
+        return substr( $haystack, 0, $length ) === $needle;
+    }
+}
+
+if (! function_exists('str_ends_with')) {
+    function str_ends_with($haystack, $needle): bool
+    {
+        $length = strlen( $needle );
+        if( !$length ) {
+            return true;
+        }
+        return substr( $haystack, -$length ) === $needle;
+    }
+}

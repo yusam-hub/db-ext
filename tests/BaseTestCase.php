@@ -15,7 +15,7 @@ class BaseTestCase extends TestCase
 
         if (is_null(self::$pdoExt)) {
             self::$pdoExt = db_ext_mysql_pdo_ext_create_from_config(include __DIR__ . "/../config/config.php");
-            //self::$pdoExt->isDebugging = true;
+            self::$pdoExt->isDebugging = true;
         }
     }
 

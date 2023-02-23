@@ -14,7 +14,11 @@ class PdoExt
     const COMMAND_REPLACE = 'REPLACE';
 
     protected \PDO $pdo;
-    protected false|\PDOStatement $pdoStatement = false;
+
+    /**
+     * @var false|\PDOStatement
+     */
+    protected $pdoStatement = false;
 
     /**
      * @param \PDO $pdo
@@ -27,15 +31,15 @@ class PdoExt
     /**
      * @return \PDO
      */
-    protected function getPdo(): \PDO
+    public function getPdo(): \PDO
     {
         return $this->pdo;
     }
 
     /**
-     * @return false|\PDOStatement
+     * @return \PDOStatement|false
      */
-    protected function PDOStatement(): false|\PDOStatement
+    protected function PDOStatement()
     {
         return $this->pdoStatement;
     }
@@ -248,7 +252,7 @@ class PdoExt
      * @param int|null $limit
      * @return bool
      */
-    public function update(string $tableName, array $fieldValues, string|array|null $whereStatementOrWhereArray = null, ?int $limit = null): bool
+    public function update(string $tableName, array $fieldValues, $whereStatementOrWhereArray = null, ?int $limit = null): bool
     {
         $bindings = [];
         $sets = [];
@@ -290,7 +294,7 @@ class PdoExt
      * @param int|null $limit
      * @return bool
      */
-    public function delete(string $tableName, string|array|null $whereStatementOrWhereArray = null, ?int $limit = null): bool
+    public function delete(string $tableName, $whereStatementOrWhereArray = null, ?int $limit = null): bool
     {
         $bindings = [];
 
