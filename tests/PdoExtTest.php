@@ -11,11 +11,14 @@ class PdoExtTest extends BaseTestCase
 
     public function testSql()
     {
+        self::$pdoExt->onDebugLogCallback(function(string $sql, array $bindings){
+            echo "onDebugLogCallback: " . $sql . " ".  json_encode($bindings) . PHP_EOL;
+        });
         $id = self::$pdoExt->insertReturnId('test', [
             'title' => 'title',
             'desc' => null,
         ]);
-        $this->assertTrue($id > 0);
+        $this->assertTrue(!is_null($id) && $id > 0);
 
         $rows = self::$pdoExt->fetchAll("SELECT * FROM test");
         $this->assertTrue(isset($rows[0]['id']));

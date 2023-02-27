@@ -13,6 +13,8 @@ class PdoExt
     const COMMAND_INSERT_IGNORE = 'INSERT IGNORE';
     const COMMAND_REPLACE = 'REPLACE';
 
+    protected ?\Closure $onDebugLogCallback = null;
+
     protected \PDO $pdo;
 
     /**
@@ -45,6 +47,15 @@ class PdoExt
     }
 
     /**
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function onDebugLogCallback(?\Closure $callback): void
+    {
+        $this->onDebugLogCallback = $callback;
+    }
+
+    /**
      * @param string $sql
      * @param array $bindings
      * @return void
@@ -52,6 +63,12 @@ class PdoExt
     protected function debugLog(string $sql, array $bindings): void
     {
         if (!$this->isDebugging) return;
+
+        if (!is_null($this->onDebugLogCallback)) {
+            $callback = $this->onDebugLogCallback;
+            $callback($sql, $bindings);
+            return;
+        }
 
         echo $sql;
         if (!empty($bindings)) {
@@ -162,9 +179,13 @@ class PdoExt
     /**
      * @return int
      */
-    public function lastInsertId(): int
+    public function lastInsertId(): ?int
     {
-        return $this->pdo->lastInsertId();
+        $result = $this->pdo->lastInsertId();
+        if ($result !== false) {
+            return intval($result);
+        }
+        return null;
     }
 
     /**
@@ -226,12 +247,14 @@ class PdoExt
     /**
      * @param string $tableName
      * @param array $fieldValues
-     * @return int
+     * @return int|null
      */
-    public function insertReturnId(string $tableName, array $fieldValues): int
+    public function insertReturnId(string $tableName, array $fieldValues): ?int
     {
-        $this->insert($tableName, $fieldValues);
-        return $this->lastInsertId();
+        if ($this->insert($tableName, $fieldValues)) {
+            return $this->lastInsertId();
+        }
+        return null;
     }
 
     /**
