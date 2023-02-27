@@ -55,4 +55,14 @@ class ExceptionPdoExt extends \Exception
     {
         return $this->lastInsertId;
     }
+
+    public function getData(): array
+    {
+        return [
+            'lastSql' => $this->lastSql,
+            'lastBindings' => $this->lastBindings,
+            'affectedRows' => $this->affectedRows,
+            'lastInsertId' => $this->lastInsertId
+        ];
+    }
 }
