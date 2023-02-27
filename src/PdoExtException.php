@@ -2,12 +2,14 @@
 
 namespace YusamHub\DbExt;
 
-class ExceptionPdoExt extends \Exception
+class PdoExtException extends \RuntimeException
 {
     protected string $lastSql;
     protected array $lastBindings;
     protected int $affectedRows;
     protected ?int $lastInsertId;
+
+    protected array $pdoErrorInfo;
 
     /**
      * @param PdoExt $pdoExt
@@ -21,6 +23,7 @@ class ExceptionPdoExt extends \Exception
         $this->lastBindings = $pdoExt->getLastBindings();
         $this->affectedRows = $pdoExt->affectedRows();
         $this->lastInsertId = $pdoExt->lastInsertId();
+        $this->pdoErrorInfo = $pdoExt->getPdo()->errorInfo();
         parent::__construct($message, $code, $previous);
     }
 
@@ -43,7 +46,7 @@ class ExceptionPdoExt extends \Exception
     /**
      * @return int
      */
-    public function affectedRows(): int
+    public function getAffectedRows(): int
     {
         return $this->affectedRows;
     }
@@ -51,18 +54,24 @@ class ExceptionPdoExt extends \Exception
     /**
      * @return int|null
      */
-    public function lastInsertId(): ?int
+    public function getLastInsertId(): ?int
     {
         return $this->lastInsertId;
+    }
+
+    public function getPdoErrorInfo(): array
+    {
+        return $this->pdoErrorInfo;
     }
 
     public function getData(): array
     {
         return [
-            'lastSql' => $this->lastSql,
-            'lastBindings' => $this->lastBindings,
-            'affectedRows' => $this->affectedRows,
-            'lastInsertId' => $this->lastInsertId
+            'lastSql' => $this->getLastSql(),
+            'lastBindings' => $this->getLastBindings(),
+            'affectedRows' => $this->getAffectedRows(),
+            'lastInsertId' => $this->getLastInsertId(),
+            'pdoErrorInfo' => $this->getPdoErrorInfo(),
         ];
     }
 }
