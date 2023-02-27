@@ -13,6 +13,8 @@ class PdoExt
     const COMMAND_INSERT_IGNORE = 'INSERT IGNORE';
     const COMMAND_REPLACE = 'REPLACE';
 
+    protected string $lastSql = '';
+    protected array $lastBindings = [];
     protected ?\Closure $onDebugLogCallback = null;
 
     protected \PDO $pdo;
@@ -56,6 +58,22 @@ class PdoExt
     }
 
     /**
+     * @return string
+     */
+    public function getLastSql(): string
+    {
+        return $this->lastSql;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLastBindings(): array
+    {
+        return $this->lastBindings;
+    }
+
+    /**
      * @param string $sql
      * @param array $bindings
      * @return void
@@ -88,15 +106,18 @@ class PdoExt
         array $bindings = [],
         ?\Closure $callbackRow = null): array
     {
-        $this->debugLog($sql, $bindings);
+        $this->lastSql = $sql;
+        $this->lastBindings = $bindings;
+
+        $this->debugLog($this->lastSql, $this->lastBindings);
 
         if (is_null($callbackRow)) {
-            $this->pdoStatement = $this->pdo->prepare($sql);
+            $this->pdoStatement = $this->pdo->prepare($this->lastSql);
         } else {
-            $this->pdoStatement = $this->pdo->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
+            $this->pdoStatement = $this->pdo->prepare($this->lastSql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
         }
 
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
+        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
             if (is_null($callbackRow)) {
                 $result = $this->pdoStatement->fetchAll(\PDO::FETCH_ASSOC);
                 if (is_array($result)) {
@@ -124,11 +145,14 @@ class PdoExt
         string $sql,
         array $bindings = []): ?array
     {
-        $this->debugLog($sql, $bindings);
+        $this->lastSql = $sql;
+        $this->lastBindings = $bindings;
 
-        $this->pdoStatement = $this->pdo->prepare($sql);
+        $this->debugLog($this->lastSql, $this->lastBindings);
 
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
+        $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+
+        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
             $ret = $this->pdoStatement->fetch(\PDO::FETCH_ASSOC);
             if (is_array($ret)) {
                 return $ret;
@@ -203,11 +227,14 @@ class PdoExt
      */
     public function exec(string $sql, array $bindings = []): bool
     {
-        $this->debugLog($sql, $bindings);
+        $this->lastSql = $sql;
+        $this->lastBindings = $bindings;
 
-        $this->pdoStatement = $this->pdo->prepare($sql);
+        $this->debugLog($this->lastSql, $this->lastBindings);
 
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
+        $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+
+        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
             return true;
         }
 
@@ -233,15 +260,7 @@ class PdoExt
 
         $sql = $command . ' INTO ' . $tableName . '  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
 
-        $this->debugLog($sql, $bindings);
-
-        $this->pdoStatement = $this->pdo->prepare($sql);
-
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            return true;
-        }
-
-        return false;
+        return $this->exec($sql, $bindings);
     }
 
     /**
@@ -266,7 +285,6 @@ class PdoExt
     {
         return $this->insert($tableName, $fieldValues, self::COMMAND_REPLACE);
     }
-
 
     /**
      * @param string $tableName
@@ -295,21 +313,13 @@ class PdoExt
         }
 
         $sql = 'UPDATE ' . $tableName . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
         }
 
-        $this->debugLog($sql, $bindings);
-
-        $this->pdoStatement = $this->pdo->prepare($sql);
-
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            return true;
-        }
-
-        return false;
+        return $this->exec($sql, $bindings);
     }
-
 
     /**
      * @param string $tableName
@@ -332,19 +342,12 @@ class PdoExt
         }
 
         $sql = 'DELETE FROM ' . $tableName . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
         }
 
-        $this->debugLog($sql, $bindings);
-
-        $this->pdoStatement = $this->pdo->prepare($sql);
-
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($bindings)) {
-            return true;
-        }
-
-        return false;
+        return $this->exec($sql, $bindings);
     }
 
     /**
