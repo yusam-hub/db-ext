@@ -79,7 +79,6 @@ abstract class Migrations
                         $scriptNumber++;
                         try {
                             $this->query($query);
-                            $this->echoLine();
                             $this->echoLine(sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
                             $this->echoLine();
                         } catch (\Throwable $e) {
@@ -93,6 +92,7 @@ abstract class Migrations
             }
         }
         $this->echoLine(sprintf('%s', 'MIGRATION SUCCESS'));
+        $this->echoLine();
     }
 
     protected function getMigrationFiles(): array
