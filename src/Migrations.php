@@ -7,6 +7,8 @@ abstract class Migrations
     protected string $migrationDir;
     protected string $storageFile;
 
+    protected ?\Closure $echoLineClosure = null;
+
     /**
      * @param string $migrationDir
      * @param string $storageFile
@@ -15,6 +17,29 @@ abstract class Migrations
     {
         $this->migrationDir = realpath($migrationDir);
         $this->storageFile = $storageFile;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return void
+     */
+    public function setEchoLineClosure(\Closure $closure): void
+    {
+        $this->echoLineClosure = $closure;
+    }
+
+    /**
+     * @param string $message
+     * @return void
+     */
+    protected function echoLine(string $message = ''): void
+    {
+        if (is_callable($this->echoLineClosure)) {
+            $closure = $this->echoLineClosure;
+            $closure($message);
+            return;
+        }
+        echo $message . PHP_EOL;
     }
 
     /**
@@ -30,8 +55,8 @@ abstract class Migrations
     {
         $files = $this->getMigrationFiles();
         if (empty($files)) {
-            echo PHP_EOL;
-            echo sprintf('%s', 'EMPTY MIGRATION FILES') . PHP_EOL;
+            $this->echoLine();
+            $this->echoLine(sprintf('%s', 'EMPTY MIGRATION FILES'));
         } else {
             $scriptNumber = 0;
             foreach($files as $file) {
@@ -52,11 +77,12 @@ abstract class Migrations
                         $scriptNumber++;
                         try {
                             $this->query($query);
-                            echo PHP_EOL;
-                            echo sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query) . PHP_EOL;
-
+                            $this->echoLine();
+                            $this->echoLine(sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
+                            $this->echoLine();
                         } catch (\Throwable $e) {
-                            echo sprintf('%s. %s - FAIL in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, basename($file)) . PHP_EOL;
+                            $this->echoLine(sprintf('%s. %s - FAIL in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, basename($file)));
+                            $this->echoLine();
                             return;
                         }
                     }
@@ -64,7 +90,7 @@ abstract class Migrations
                 file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
             }
         }
-        echo sprintf('%s', 'MIGRATION SUCCESS') . PHP_EOL;
+        $this->echoLine(sprintf('%s', 'MIGRATION SUCCESS'));
     }
 
     protected function getMigrationFiles(): array
