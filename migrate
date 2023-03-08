@@ -7,9 +7,5 @@ use YusamHub\DbExt\PdoExtMigrations;
 
 $pdoExt = db_ext_mysql_pdo_ext_create_from_config(include __DIR__ . "/config/config.php");
 
-$mySqlPdoExtMigrations = new PdoExtMigrations($pdoExt, __DIR__ . '/migrations/php');
+$mySqlPdoExtMigrations = new PdoExtMigrations($pdoExt, __DIR__ . '/migrations/mix', __DIR__ . "/tmp/migrations.txt");
 $mySqlPdoExtMigrations->migrate();
-
-$mySqlPdoExtMigrations = new PdoExtMigrations($pdoExt, __DIR__ . '/migrations/sql');
-$mySqlPdoExtMigrations->migrate();
-

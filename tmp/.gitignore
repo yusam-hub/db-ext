@@ -1,4 +1,2 @@
 *
-!*.php
-!*.sql
 !.gitignore

@@ -1,2 +1,4 @@
-migrations.txt
+*
+!*.php
+!*.sql
 !.gitignore

@@ -5,15 +5,16 @@ namespace YusamHub\DbExt;
 abstract class Migrations
 {
     protected string $migrationDir;
-    protected string $migrationFile;
+    protected string $storageFile;
 
     /**
      * @param string $migrationDir
+     * @param string $storageFile
      */
-    public function __construct(string $migrationDir)
+    public function __construct(string $migrationDir, string $storageFile)
     {
         $this->migrationDir = realpath($migrationDir);
-        $this->migrationFile = $this->migrationDir . DIRECTORY_SEPARATOR . "migrations.txt";
+        $this->storageFile = $storageFile;
     }
 
     /**
@@ -60,7 +61,7 @@ abstract class Migrations
                         }
                     }
                 }
-                file_put_contents($this->migrationFile, basename($file) . PHP_EOL, FILE_APPEND);
+                file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
             }
         }
         echo sprintf('%s', 'MIGRATION SUCCESS') . PHP_EOL;
@@ -73,9 +74,11 @@ abstract class Migrations
             glob($this->migrationDir . DIRECTORY_SEPARATOR . '*.php')
         );
 
+        sort($allFiles);
+
         $migrationFiles = [];
-        if (file_exists($this->migrationFile)) {
-            $migrationFiles = array_filter(explode(PHP_EOL, file_get_contents($this->migrationFile)));
+        if (file_exists($this->storageFile)) {
+            $migrationFiles = array_filter(explode(PHP_EOL, file_get_contents($this->storageFile)));
             $migrationFiles = array_map(function($v){
                 return $this->migrationDir . DIRECTORY_SEPARATOR . $v;
             }, $migrationFiles);
