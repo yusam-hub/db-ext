@@ -60,6 +60,8 @@ abstract class Migrations
         } else {
             $scriptNumber = 0;
             foreach($files as $file) {
+                $this->echoLine(sprintf("Try file [%s]", $file));
+                $this->echoLine();
                 $content = "";
                 if (str_ends_with($file, '.sql')) {
                     $content = file_get_contents($file);
@@ -95,6 +97,9 @@ abstract class Migrations
 
     protected function getMigrationFiles(): array
     {
+        $this->echoLine(sprintf("Migration directory [%s]", $this->migrationDir));
+        $this->echoLine();
+
         $allFiles = array_merge(
             glob($this->migrationDir . DIRECTORY_SEPARATOR . '*.sql'),
             glob($this->migrationDir . DIRECTORY_SEPARATOR . '*.php')
