@@ -82,8 +82,7 @@ abstract class Migrations
                             $this->echoLine(sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
                             $this->echoLine();
                         } catch (\Throwable $e) {
-                            $this->echoLine(sprintf('%s. %s - FAIL in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, basename($file)));
-                            $this->echoLine('ERROR: ' . $e->getMessage());
+                            $this->echoLine(sprintf('%s. %s - FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, $e->getMessage(), basename($file)));
                             $this->echoLine();
                             return;
                         }
