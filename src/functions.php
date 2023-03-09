@@ -4,7 +4,10 @@ if (! function_exists('db_ext_mysql_pdo_ext_create')) {
 
     function db_ext_mysql_pdo_ext_create(string $host, string $port, string $user, string $password, string $dbName = null, bool $newConnection = false): \YusamHub\DbExt\PdoExt
     {
-        $options = [];
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        ];
+
         if (!$newConnection) {
             $options[\PDO::ATTR_PERSISTENT] = true;
         }
