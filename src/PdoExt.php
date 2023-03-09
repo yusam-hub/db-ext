@@ -163,14 +163,14 @@ class PdoExt
         if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
             if (is_null($callbackRow)) {
                 $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
-                $result = $this->pdoStatement->fetchAll(\PDO::FETCH_OBJ);
+                $result = $this->pdoStatement->fetchAll(\PDO::FETCH_CLASS);
                 if (is_array($result)) {
                     return $result;
                 }
             } else {
                 $rows = [];
                 $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
-                while($obj = $this->pdoStatement->fetch(\PDO::FETCH_OBJ)) {
+                while($obj = $this->pdoStatement->fetch(\PDO::FETCH_CLASS)) {
                     if (is_object($obj)) {
                         $rows[] = $callbackRow($obj);
                     }
@@ -226,7 +226,7 @@ class PdoExt
 
         if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
             $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
-            $ret = $this->pdoStatement->fetch(\PDO::FETCH_OBJ);
+            $ret = $this->pdoStatement->fetch(\PDO::FETCH_CLASS);
             if (is_object($ret)) {
                 return $ret;
             }
