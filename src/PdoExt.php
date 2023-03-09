@@ -137,6 +137,51 @@ class PdoExt
     }
 
     /**
+     * @param string $fetchClass
+     * @param string $sql
+     * @param array $bindings
+     * @param \Closure|null $callbackRow
+     * @return array
+     */
+    public function fetchObjectAll(
+        string $fetchClass,
+        string $sql,
+        array $bindings = [],
+        ?\Closure $callbackRow = null): array
+    {
+        $this->lastSql = $sql;
+        $this->lastBindings = $bindings;
+
+        $this->debugLog($this->lastSql, $this->lastBindings);
+
+        if (is_null($callbackRow)) {
+            $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+        } else {
+            $this->pdoStatement = $this->pdo->prepare($this->lastSql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
+        }
+
+        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
+            if (is_null($callbackRow)) {
+                $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
+                $result = $this->pdoStatement->fetchAll(\PDO::FETCH_OBJ);
+                if (is_array($result)) {
+                    return $result;
+                }
+            } else {
+                $rows = [];
+                $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
+                while($obj = $this->pdoStatement->fetch(\PDO::FETCH_OBJ)) {
+                    if (is_object($obj)) {
+                        $rows[] = $callbackRow($obj);
+                    }
+                }
+                return $rows;
+            }
+        }
+        return [];
+    }
+
+    /**
      * @param string $sql
      * @param array $bindings
      * @return null|array
@@ -155,6 +200,34 @@ class PdoExt
         if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
             $ret = $this->pdoStatement->fetch(\PDO::FETCH_ASSOC);
             if (is_array($ret)) {
+                return $ret;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param string $fetchClass
+     * @param string $sql
+     * @param array $bindings
+     * @return null|object
+     */
+    public function fetchObjectOne(
+        string $fetchClass,
+        string $sql,
+        array $bindings = []):?object
+    {
+        $this->lastSql = $sql;
+        $this->lastBindings = $bindings;
+
+        $this->debugLog($this->lastSql, $this->lastBindings);
+
+        $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+
+        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
+            $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
+            $ret = $this->pdoStatement->fetch(\PDO::FETCH_OBJ);
+            if (is_object($ret)) {
                 return $ret;
             }
         }
