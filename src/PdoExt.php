@@ -271,7 +271,7 @@ class PdoExt
             $bindings[] = $value;
         }
 
-        $sql = $command . ' INTO ' . $tableName . '  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
+        $sql = $command . ' INTO `' . $tableName . '`  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
 
         return $this->exec($sql, $bindings);
     }
@@ -325,7 +325,7 @@ class PdoExt
             $where[] = $whereStatementOrWhereArray;
         }
 
-        $sql = 'UPDATE ' . $tableName . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        $sql = 'UPDATE `' . $tableName . "` SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
 
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
