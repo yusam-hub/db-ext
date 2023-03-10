@@ -57,8 +57,6 @@ abstract class Migrations
         $files = $this->getMigrationFiles();
 
         if (empty($files)) {
-            $this->echoLine();
-            $this->echoLine("INFO", sprintf('%s', 'EMPTY MIGRATION FILES'));
             return;
         }
 
@@ -73,8 +71,8 @@ abstract class Migrations
                     $content = $obj->getQuery();
                 }
             }
-            $content .= "\r";
-            $queries = explode(";\r", $content);
+            $content .= PHP_EOL;
+            $queries = explode(";" . PHP_EOL, $content);
             foreach($queries as $query) {
                 $query = trim($query);
                 if (!empty($query)) {
