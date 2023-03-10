@@ -80,12 +80,12 @@ abstract class Migrations
                 $query = rtrim($query, ';\r');
                 if (!empty($query)) {
                     $scriptNumber++;
+                    $this->echoLine("INFO", sprintf('%s. %s',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
                     try {
                         $this->query($query);
-                        $this->echoLine("INFO", sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
                         $this->echoLine();
                     } catch (\Throwable $e) {
-                        $this->echoLine("ERROR", sprintf('%s. %s - FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, $e->getMessage(), basename($file)));
+                        $this->echoLine("ERROR", sprintf('%s. FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $e->getMessage(), basename($file)));
                         $this->echoLine();
                         return;
                     }
