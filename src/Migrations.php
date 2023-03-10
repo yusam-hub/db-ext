@@ -71,13 +71,13 @@ abstract class Migrations
                     $content = $obj->getQuery();
                 }
             }
-            $content = trim($content);
+            $queries = MySqlSplitter::split($content);
+            /*$content = trim($content);
             $content = rtrim($content, ';');
-            $content .= ';\r';
-            $queries = explode(";\r", $content);
+            $content .= ';\n';
+            $queries = explode(";\n", $content);*/
             foreach($queries as $query) {
                 $query = trim($query);
-                $query = rtrim($query, ';\r');
                 if (!empty($query)) {
                     $scriptNumber++;
                     $this->echoLine("INFO", sprintf('%s. %s',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
