@@ -14,10 +14,10 @@ class PdoExtException extends \RuntimeException
     /**
      * @param PdoExt $pdoExt
      * @param string $message
-     * @param int $code
+     * @param $code
      * @param \Throwable|null $previous
      */
-    public function __construct(PdoExt $pdoExt, string $message = "", int $code = 0, \Throwable $previous = null)
+    public function __construct(PdoExt $pdoExt, string $message = "", $code = 0, ?\Throwable $previous = null)
     {
         $this->lastSql = $pdoExt->getLastSql();
         $this->lastBindings = $pdoExt->getLastBindings();
