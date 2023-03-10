@@ -71,11 +71,8 @@ abstract class Migrations
                     $content = $obj->getQuery();
                 }
             }
-            $queries = MySqlSplitter::split($content);
-            /*$content = trim($content);
-            $content = rtrim($content, ';');
-            $content .= ';\n';
-            $queries = explode(";\n", $content);*/
+            $content = trim($content);
+            $queries = explode(";", $content);
             foreach($queries as $query) {
                 $query = trim($query);
                 if (!empty($query)) {
