@@ -71,7 +71,9 @@ abstract class Migrations
                     $content = $obj->getQuery();
                 }
             }
-            $content .= PHP_EOL;
+            $content = trim($content);
+            $content = rtrim($content, ';');
+            $content .= ';' . PHP_EOL;
             $queries = explode(";" . PHP_EOL, $content);
             foreach($queries as $query) {
                 $query = trim($query);
