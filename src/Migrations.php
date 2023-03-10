@@ -77,7 +77,7 @@ abstract class Migrations
             $queries = explode(";\r", $content);
             foreach($queries as $query) {
                 $query = trim($query);
-                $query = rtrim($query, '\r');
+                $query = rtrim($query, ';\r');
                 if (!empty($query)) {
                     $scriptNumber++;
                     try {
