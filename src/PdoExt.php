@@ -74,6 +74,37 @@ class PdoExt
     }
 
     /**
+     * @param string $query
+     * @param array $options
+     * @return false|\PDOStatement
+     */
+    protected function pdoPrepare(string $query, array $options = [])
+    {
+        try {
+            return $this->pdo->prepare($query, $options);
+        } catch (\PDOException $e) {
+            $newE = new PdoExtException($this, $e->getMessage(), $e->getCode(), $e);
+            $this->debugLog($newE->getMessage(), $newE->getData());
+            throw $newE;
+        }
+    }
+
+    /**
+     * @param $params
+     * @return bool
+     */
+    protected function pdoStatementExecute($params = null): bool
+    {
+        try {
+            return $this->pdoStatement->execute($params);
+        } catch (\PDOException $e) {
+            $newE = new PdoExtException($this, $e->getMessage(), $e->getCode(), $e);
+            $this->debugLog($newE->getMessage(), $newE->getData());
+            throw $newE;
+        }
+    }
+
+    /**
      * @param string $sql
      * @param array $bindings
      * @return void
@@ -114,12 +145,12 @@ class PdoExt
         $this->debugLog($this->lastSql, $this->lastBindings);
 
         if (is_null($callbackRow)) {
-            $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+            $this->pdoStatement = $this->pdoPrepare($this->lastSql);
         } else {
-            $this->pdoStatement = $this->pdo->prepare($this->lastSql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
+            $this->pdoStatement = $this->pdoPrepare($this->lastSql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
         }
 
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
+        if ($this->pdoStatement !== false && $this->pdoStatementExecute($this->lastBindings)) {
             if (is_null($callbackRow)) {
                 if (class_exists($fetchClass)) {
                     $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
@@ -160,9 +191,9 @@ class PdoExt
 
         $this->debugLog($this->lastSql, $this->lastBindings);
 
-        $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+        $this->pdoStatement = $this->pdoPrepare($this->lastSql);
 
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
+        if ($this->pdoStatement !== false && $this->pdoStatementExecute($this->lastBindings)) {
             if (class_exists($fetchClass)) {
                 $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
             }
@@ -245,9 +276,9 @@ class PdoExt
 
         $this->debugLog($this->lastSql, $this->lastBindings);
 
-        $this->pdoStatement = $this->pdo->prepare($this->lastSql);
+        $this->pdoStatement = $this->pdoPrepare($this->lastSql);
 
-        if ($this->pdoStatement !== false && $this->pdoStatement->execute($this->lastBindings)) {
+        if ($this->pdoStatement !== false && $this->pdoStatementExecute($this->lastBindings)) {
             return true;
         }
 
