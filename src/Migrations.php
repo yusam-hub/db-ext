@@ -48,6 +48,9 @@ abstract class Migrations
      * @return void
      */
     abstract protected function query(string $sql): void;
+    abstract protected function beginTransaction(): void;
+    abstract protected function rollBackTransaction(): void;
+    abstract protected function commitTransaction(): void;
 
     /**
      * @return void
@@ -73,6 +76,9 @@ abstract class Migrations
             }
             $content = trim($content);
             $queries = explode(";", $content);
+
+            $this->beginTransaction();
+
             foreach($queries as $query) {
                 $query = trim($query);
                 if (!empty($query)) {
@@ -84,11 +90,15 @@ abstract class Migrations
                     } catch (\Throwable $e) {
                         $this->echoLine("ERROR", sprintf('%s. FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $e->getMessage(), basename($file)));
                         $this->echoLine();
+                        $this->rollBackTransaction();
                         return;
                     }
                 }
             }
+
             file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
+
+            $this->commitTransaction();
         }
     }
 

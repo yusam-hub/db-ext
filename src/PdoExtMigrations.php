@@ -25,4 +25,19 @@ class PdoExtMigrations extends Migrations
     {
         $this->pdoExt->exec($sql);
     }
+
+    protected function beginTransaction(): void
+    {
+        $this->pdoExt->beginTransaction();
+    }
+
+    protected function commitTransaction(): void
+    {
+        $this->pdoExt->commitTransaction();
+    }
+
+    protected function rollBackTransaction(): void
+    {
+        $this->pdoExt->rollBackTransaction();
+    }
 }
