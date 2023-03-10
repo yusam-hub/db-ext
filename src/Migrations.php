@@ -29,14 +29,15 @@ abstract class Migrations
     }
 
     /**
+     * @param string $level
      * @param string $message
      * @return void
      */
-    protected function echoLine(string $message = ''): void
+    protected function echoLine(string $level = 'INFO', string $message = ''): void
     {
         if (is_callable($this->echoLineClosure)) {
             $closure = $this->echoLineClosure;
-            $closure($message);
+            $closure($level, $message);
             return;
         }
         echo $message . PHP_EOL;
@@ -54,52 +55,47 @@ abstract class Migrations
     public function migrate(): void
     {
         $files = $this->getMigrationFiles();
+
         if (empty($files)) {
             $this->echoLine();
-            $this->echoLine(sprintf('%s', 'EMPTY MIGRATION FILES'));
-        } else {
-            $scriptNumber = 0;
-            foreach($files as $file) {
-                $this->echoLine(sprintf("Try file [%s]", $file));
-                $this->echoLine();
-                $content = "";
-                if (str_ends_with($file, '.sql')) {
-                    $content = file_get_contents($file);
-                } elseif (str_ends_with($file, '.php')) {
-                    $obj = include $file;
-                    if (method_exists( $obj, 'getQuery')) {
-                        $content = $obj->getQuery();
-                    }
-                }
-                $content .= "\r";
-                $queries = explode(";\r", $content);
-                foreach($queries as $query) {
-                    $query = trim($query);
-                    if (!empty($query)) {
-                        $scriptNumber++;
-                        try {
-                            $this->query($query);
-                            $this->echoLine(sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
-                            $this->echoLine();
-                        } catch (\Throwable $e) {
-                            $this->echoLine(sprintf('%s. %s - FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, $e->getMessage(), basename($file)));
-                            $this->echoLine();
-                            return;
-                        }
-                    }
-                }
-                file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
-            }
+            $this->echoLine("INFO", sprintf('%s', 'EMPTY MIGRATION FILES'));
+            return;
         }
-        $this->echoLine(sprintf('%s', 'MIGRATION SUCCESS'));
-        $this->echoLine();
+
+        $scriptNumber = 0;
+        foreach($files as $file) {
+            $content = "";
+            if (str_ends_with($file, '.sql')) {
+                $content = file_get_contents($file);
+            } elseif (str_ends_with($file, '.php')) {
+                $obj = include $file;
+                if (method_exists( $obj, 'getQuery')) {
+                    $content = $obj->getQuery();
+                }
+            }
+            $content .= "\r";
+            $queries = explode(";\r", $content);
+            foreach($queries as $query) {
+                $query = trim($query);
+                if (!empty($query)) {
+                    $scriptNumber++;
+                    try {
+                        $this->query($query);
+                        $this->echoLine("INFO", sprintf('%s. %s - OK',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
+                        $this->echoLine();
+                    } catch (\Throwable $e) {
+                        $this->echoLine("ERROR", sprintf('%s. %s - FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query, $e->getMessage(), basename($file)));
+                        $this->echoLine();
+                        return;
+                    }
+                }
+            }
+            file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
+        }
     }
 
     protected function getMigrationFiles(): array
     {
-        $this->echoLine(sprintf("Migration directory [%s]", $this->migrationDir));
-        $this->echoLine();
-
         $allFiles = array_merge(
             glob($this->migrationDir . DIRECTORY_SEPARATOR . '*.sql'),
             glob($this->migrationDir . DIRECTORY_SEPARATOR . '*.php')
