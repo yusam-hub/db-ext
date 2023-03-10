@@ -9,7 +9,7 @@ class PdoExtException extends \RuntimeException
     protected int $affectedRows;
     protected ?int $lastInsertId;
 
-    protected array $pdoErrorInfo;
+    protected array $pdoExtra;
 
     /**
      * @param PdoExt $pdoExt
@@ -23,8 +23,11 @@ class PdoExtException extends \RuntimeException
         $this->lastBindings = $pdoExt->getLastBindings();
         $this->affectedRows = $pdoExt->affectedRows();
         $this->lastInsertId = $pdoExt->lastInsertId();
-        $this->pdoErrorInfo = $pdoExt->getPdo()->errorInfo();
-        parent::__construct($message, $code, $previous);
+        $this->pdoExtra = [
+            'code' => $code,
+            'errorInfo' => $pdoExt->getPdo()->errorInfo()
+        ];
+        parent::__construct($message, 0, $previous);
     }
 
     /**
@@ -59,9 +62,9 @@ class PdoExtException extends \RuntimeException
         return $this->lastInsertId;
     }
 
-    public function getPdoErrorInfo(): array
+    public function getPdoExtra(): array
     {
-        return $this->pdoErrorInfo;
+        return $this->pdoExtra;
     }
 
     public function getData(): array
@@ -71,7 +74,7 @@ class PdoExtException extends \RuntimeException
             'lastBindings' => $this->getLastBindings(),
             'affectedRows' => $this->getAffectedRows(),
             'lastInsertId' => $this->getLastInsertId(),
-            'pdoErrorInfo' => $this->getPdoErrorInfo(),
+            'pdoExtra' => $this->getPdoExtra(),
         ];
     }
 }
