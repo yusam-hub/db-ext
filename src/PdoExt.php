@@ -105,23 +105,23 @@ class PdoExt
     }
 
     /**
-     * @param string $sql
-     * @param array $bindings
+     * @param string $message
+     * @param array $context
      * @return void
      */
-    protected function debugLog(string $sql, array $bindings): void
+    protected function debugLog(string $message, array $context = []): void
     {
         if (!$this->isDebugging) return;
 
         if (!is_null($this->onDebugLogCallback)) {
             $callback = $this->onDebugLogCallback;
-            $callback($sql, $bindings);
+            $callback($message, $context);
             return;
         }
 
-        echo $sql;
-        if (!empty($bindings)) {
-            echo json_encode($bindings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        echo $message;
+        if (!empty($context)) {
+            echo json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
         echo PHP_EOL;
     }
