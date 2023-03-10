@@ -73,8 +73,8 @@ abstract class Migrations
             }
             $content = trim($content);
             $content = rtrim($content, ';');
-            $content .= ';' . PHP_EOL;
-            $queries = explode(";" . PHP_EOL, $content);
+            $content .= ';\r';
+            $queries = explode(";\r", $content);
             foreach($queries as $query) {
                 $query = trim($query);
                 if (!empty($query)) {
