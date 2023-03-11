@@ -395,6 +395,41 @@ class PdoExt
     }
 
     /**
+     * @param string $classModel
+     * @param string $tableName
+     * @param string $pkKey
+     * @param $pkVal
+     * @return object|null
+     */
+    public function findModel(string $classModel, string $tableName, string $pkKey, $pkVal): ?object
+    {
+        return $this->findModelByAttributes($classModel, $tableName, [$pkKey => $pkVal]);
+    }
+
+    /**
+     * @param string $classModel
+     * @param string $tableName
+     * @param array $attributes
+     * @return object|null
+     */
+    public function findModelByAttributes(string $classModel, string $tableName, array $attributes): ?object
+    {
+        $where = [];
+        $bindings = [];
+        foreach($attributes as $key => $value) {
+            $where[] = sprintf("`%s` = ?", $key);
+            $bindings[] = $value;
+        }
+        return $this->fetchOne(
+            strtr("SELECT * FROM `" . $tableName . "`:where LIMIT 0,1", [
+                ':where' => !empty($where) ? ' WHERE '. implode('AND', $where) : '',
+            ]),
+            $bindings,
+            $classModel
+        );
+    }
+
+    /**
      * @return bool
      */
     public function beginTransaction(): bool
