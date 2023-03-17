@@ -5,6 +5,7 @@ namespace YusamHub\DbExt;
 
 use YusamHub\DbExt\Interfaces\PdoExtKernelInterface;
 use YusamHub\DbExt\Interfaces\PdoExtModelInterface;
+use YusamHub\DbExt\Traits\GetSetPdoExtKernelTrait;
 use YusamHub\DbExt\Traits\PdoExtModelTrait;
 
 /**
@@ -16,4 +17,5 @@ use YusamHub\DbExt\Traits\PdoExtModelTrait;
 abstract class PdoExtModel implements PdoExtModelInterface
 {
     use PdoExtModelTrait;
+    use GetSetPdoExtKernelTrait;
 }

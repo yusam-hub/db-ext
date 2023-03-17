@@ -10,11 +10,6 @@ use YusamHub\DbExt\Interfaces\PdoExtModelInterface;
 
 trait PdoExtModelTrait
 {
-    /**
-     * @var PdoExtKernelInterface|null
-     */
-    protected ?PdoExtKernelInterface $pdoExtKernel = null;
-
     protected ?string $connectionName = null;
     /**
      * @var string
@@ -27,23 +22,6 @@ trait PdoExtModelTrait
      * @var string|int
      */
     protected $primaryKey = '';
-
-    /**
-     * @param PdoExtKernelInterface $pdoExtKernel
-     * @return void
-     */
-    public function setPdoExtKernel(PdoExtKernelInterface $pdoExtKernel): void
-    {
-        $this->pdoExtKernel = $pdoExtKernel;
-    }
-
-    /**
-     * @return PdoExtInterface
-     */
-    public function getPdoExtKernel(): PdoExtKernelInterface
-    {
-        return $this->pdoExtKernel;
-    }
 
     public static function findModel(PdoExtKernelInterface $pdoExtKernel, $pk)
     {
