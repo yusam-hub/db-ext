@@ -2,16 +2,15 @@
 
 namespace YusamHub\DbExt;
 
+use YusamHub\DbExt\Exceptions\PdoExtException;
+use YusamHub\DbExt\Interfaces\PdoExtInterface;
 use YusamHub\DbExt\Traits\MySqlPdoExtTrait;
 
-class PdoExt
+class PdoExt implements PdoExtInterface
 {
     use MySqlPdoExtTrait;
 
     public bool $isDebugging = false;
-    const COMMAND_INSERT = 'INSERT';
-    const COMMAND_INSERT_IGNORE = 'INSERT IGNORE';
-    const COMMAND_REPLACE = 'REPLACE';
 
     protected string $lastSql = '';
     protected array $lastBindings = [];
@@ -38,14 +37,6 @@ class PdoExt
     public function getPdo(): \PDO
     {
         return $this->pdo;
-    }
-
-    /**
-     * @return \PDOStatement|false
-     */
-    protected function PDOStatement()
-    {
-        return $this->pdoStatement;
     }
 
     /**

@@ -1,8 +1,11 @@
 <?php
 
-namespace YusamHub\DbExt;
+namespace YusamHub\DbExt\Exceptions;
 
-class PdoExtException extends \RuntimeException
+use YusamHub\DbExt\Interfaces\PdoExtExceptionInterface;
+use YusamHub\DbExt\PdoExt;
+
+class PdoExtException extends \RuntimeException implements PdoExtExceptionInterface
 {
     protected string $lastSql;
     protected array $lastBindings;
