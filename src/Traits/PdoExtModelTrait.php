@@ -4,16 +4,18 @@ namespace YusamHub\DbExt\Traits;
 
 use YusamHub\DbExt\Exceptions\PdoExtModelException;
 use YusamHub\DbExt\Interfaces\PdoExtInterface;
+use YusamHub\DbExt\Interfaces\PdoExtKernelInterface;
 use YusamHub\DbExt\Interfaces\PdoExtModelExceptionInterface;
 use YusamHub\DbExt\Interfaces\PdoExtModelInterface;
 
 trait PdoExtModelTrait
 {
     /**
-     * @var PdoExtInterface|null
+     * @var PdoExtKernelInterface|null
      */
-    protected ?PdoExtInterface $pdoExt = null;
+    protected ?PdoExtKernelInterface $pdoExtKernel = null;
 
+    protected string $connectionName = '';
     /**
      * @var string
      */
@@ -27,49 +29,49 @@ trait PdoExtModelTrait
     protected $primaryKey = '';
 
     /**
-     * @param PdoExtInterface $pdoExt
+     * @param PdoExtKernelInterface $pdoExtKernel
      * @return void
      */
-    public function setPdoExt(PdoExtInterface $pdoExt): void
+    public function setPdoExtKernel(PdoExtKernelInterface $pdoExtKernel): void
     {
-        $this->pdoExt = $pdoExt;
+        $this->pdoExtKernel = $pdoExtKernel;
     }
 
     /**
      * @return PdoExtInterface
      */
-    public function getPdoExt(): PdoExtInterface
+    public function getPdoExtKernel(): PdoExtKernelInterface
     {
-        return $this->pdoExt;
+        return $this->pdoExtKernel;
     }
 
-    public static function findModel(PdoExtInterface $pdoExt, $pk)
+    public static function findModel(PdoExtKernelInterface $pdoExtKernel, $pk)
     {
         $model = new static();
-        $newModel = $pdoExt->findModel(get_class($model), $model->tableName, $model->primaryKey, $pk);
+        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModel(get_class($model), $model->tableName, $model->primaryKey, $pk);
         if ($newModel instanceof PdoExtModelInterface) {
-            $newModel->setPdoExt($pdoExt);
+            $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
             return $newModel;
         }
         return null;
     }
 
-    public static function findModelByAttributes(PdoExtInterface $pdoExt, array $attributes)
+    public static function findModelByAttributes(PdoExtKernelInterface $pdoExtKernel, array $attributes)
     {
         $model = new static();
-        $newModel = $pdoExt->findModelByAttributes(get_class($model), $model->tableName, $attributes);
+        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModelByAttributes(get_class($model), $model->tableName, $attributes);
         if ($newModel instanceof PdoExtModelInterface) {
-            $newModel->setPdoExt($pdoExt);
+            $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
             return $newModel;
         }
         return null;
     }
 
-    public static function findModelOrFail(PdoExtInterface $pdoExt, $pk)
+    public static function findModelOrFail(PdoExtKernelInterface $pdoExtKernel, $pk)
     {
-        $model = static::findModel($pdoExt, $pk);
+        $model = static::findModel($pdoExtKernel, $pk);
         if (is_null($model)) {
             throw new PdoExtModelException([
                 (new static())->primaryKey => $pk,
@@ -78,9 +80,9 @@ trait PdoExtModelTrait
         return $model;
     }
 
-    public static function findModelByAttributesOrFail(PdoExtInterface $pdoExt, array $attributes)
+    public static function findModelByAttributesOrFail(PdoExtKernelInterface $pdoExtKernel, array $attributes)
     {
-        $model = static::findModelByAttributes($pdoExt, $attributes);
+        $model = static::findModelByAttributes($pdoExtKernel, $attributes);
         if (is_null($model)) {
             throw new PdoExtModelException($attributes, PdoExtModelExceptionInterface::EXCEPTION_MESSAGE_MODEL_NOT_FOUND);
         }
@@ -108,7 +110,7 @@ trait PdoExtModelTrait
 
             $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_INSERT);
 
-            $primaryValue = $this->getPdoExt()->insertReturnId(
+            $primaryValue = $this->pdoExtKernel->pdoExt($this->connectionName)->insertReturnId(
                 $this->tableName,
                 $this->getAttributes()
             );
@@ -117,7 +119,7 @@ trait PdoExtModelTrait
                 $this->{$this->primaryKey} = $primaryValue;
             }
 
-            if ($this->getPdoExt()->affectedRows() === 1) {
+            if ($this->pdoExtKernel->pdoExt($this->connectionName)->affectedRows() === 1) {
 
                 $this->savedAttributes = $this->getAttributes();
 
@@ -143,7 +145,7 @@ trait PdoExtModelTrait
 
         $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_UPDATE);
 
-        $result = $this->getPdoExt()->update(
+        $result = $this->pdoExtKernel->pdoExt($this->connectionName)->update(
             $this->tableName,
             $changedValues,
             [

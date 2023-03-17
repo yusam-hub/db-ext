@@ -8,16 +8,16 @@ interface PdoExtModelInterface
     const TRIGGER_TYPE_SAVE_ON_INSERT = 1;
     const TRIGGER_TYPE_SAVE_ON_UPDATE = 2;
 
-    function setPdoExt(PdoExtInterface $pdoExt): void;
-    function getPdoExt(): PdoExtInterface;
+    function setPdoExtKernel(PdoExtKernelInterface $pdoExt): void;
+    function getPdoExtKernel(): PdoExtKernelInterface;
 
-    static function findModel(PdoExtInterface $pdoExt, $pk);
+    static function findModel(PdoExtKernelInterface $pdoExt, $pk);
 
-    static function findModelByAttributes(PdoExtInterface $pdoExt, array $attributes);
+    static function findModelByAttributes(PdoExtKernelInterface $pdoExt, array $attributes);
 
-    static function findModelOrFail(PdoExtInterface $pdoExt, $pk);
+    static function findModelOrFail(PdoExtKernelInterface $pdoExt, $pk);
 
-    static function findModelByAttributesOrFail(PdoExtInterface $pdoExt, array $attributes);
+    static function findModelByAttributesOrFail(PdoExtKernelInterface $pdoExt, array $attributes);
 
     function getAttributes(): array;
 
