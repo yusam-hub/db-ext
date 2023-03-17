@@ -91,12 +91,12 @@ trait PdoExtModelTrait
 
     public function setAttributes(array $attributes): void
     {
+        $this->savedAttributes = [];
         foreach($attributes as $attribute => $value) {
             if (property_exists($this, $attribute)) {
                 $this->{$attribute} = $value;
             }
         }
-        $this->savedAttributes = $this->getAttributes();
     }
 
     public function save(): bool
