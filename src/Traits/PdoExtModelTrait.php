@@ -15,7 +15,7 @@ trait PdoExtModelTrait
      */
     protected ?PdoExtKernelInterface $pdoExtKernel = null;
 
-    protected string $connectionName = '';
+    protected ?string $connectionName = null;
     /**
      * @var string
      */
