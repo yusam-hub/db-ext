@@ -4,6 +4,7 @@ namespace YusamHub\DbExt;
 
 use YusamHub\DbExt\Exceptions\PdoExtException;
 use YusamHub\DbExt\Interfaces\PdoExtInterface;
+use YusamHub\DbExt\Interfaces\PdoExtQueryBuilderInterface;
 use YusamHub\DbExt\Traits\MySqlPdoExtTrait;
 
 class PdoExt implements PdoExtInterface
@@ -486,6 +487,14 @@ class PdoExt implements PdoExtInterface
         }
 
         return $success;
+    }
+
+    /**
+     * @return PdoExtQueryBuilderInterface
+     */
+    public function queryBuilder(): PdoExtQueryBuilderInterface
+    {
+        return new PdoExtQueryBuilder($this);
     }
 
 }

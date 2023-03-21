@@ -35,4 +35,5 @@ interface PdoExtInterface
     function commitTransaction(): bool;
     function rollBackTransaction(): bool;
     function withTransaction(\Closure $callback, bool $handleRollBackException): bool;
+    public function queryBuilder(): PdoExtQueryBuilderInterface;
 }
