@@ -3,18 +3,22 @@
 namespace YusamHub\DbExt\Interfaces;
 interface PdoExtQueryBuilderInterface
 {
+    function select($expression): PdoExtQueryBuilderInterface;
+    function from($tableReferences): PdoExtQueryBuilderInterface;
+    function where($condition): PdoExtQueryBuilderInterface;
+    function andWhere($condition): PdoExtQueryBuilderInterface;
+    function orWhere($condition): PdoExtQueryBuilderInterface;
+    function groupBy($expression): PdoExtQueryBuilderInterface;
+    function addGroupBy($expression): PdoExtQueryBuilderInterface;
+    function having($condition): PdoExtQueryBuilderInterface;
+    function addHaving($condition): PdoExtQueryBuilderInterface;
+    function orderBy($expression): PdoExtQueryBuilderInterface;
+    function addOrderBy($expression): PdoExtQueryBuilderInterface;
+    function offset(int $offset): PdoExtQueryBuilderInterface;
+    function limit(int $limit): PdoExtQueryBuilderInterface;
     function getSql(): string;
-    public function select($expression): PdoExtQueryBuilderInterface;
-    public function from($reference): PdoExtQueryBuilderInterface;
-    public function where($condition): PdoExtQueryBuilderInterface;
-    public function andWhere($condition): PdoExtQueryBuilderInterface;
-    public function orWhere($condition): PdoExtQueryBuilderInterface;
-    public function groupBy($expression): PdoExtQueryBuilderInterface;
-    public function addGroupBy($expression): PdoExtQueryBuilderInterface;
-    public function having($condition): PdoExtQueryBuilderInterface;
-    public function addHaving($condition): PdoExtQueryBuilderInterface;
-    public function orderBy($expression): PdoExtQueryBuilderInterface;
-    public function addOrderBy($expression): PdoExtQueryBuilderInterface;
-    public function offset(int $offset): PdoExtQueryBuilderInterface;
-    public function limit(int $limit): PdoExtQueryBuilderInterface;
+    function getBindings(): array;
+    function fetchAll(?\Closure $callbackRow = null, ?string $fetchClass = null): array;
+    function fetchOne(?string $fetchClass = null);
+    function fetchOneColumn(string $columnName, ?string $defaultValue = null): ?string;
 }

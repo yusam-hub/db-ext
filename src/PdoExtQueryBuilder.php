@@ -12,15 +12,11 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
     {
         $this->pdoExt = $pdoExt;
     }
-    function getSql(): string
-    {
-        return '';
-    }
     public function select($expression): PdoExtQueryBuilderInterface
     {
         return $this;
     }
-    public function from($reference): PdoExtQueryBuilderInterface
+    public function from($tableReferences): PdoExtQueryBuilderInterface
     {
         return $this;
     }
@@ -67,5 +63,25 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
     public function limit(int $limit): PdoExtQueryBuilderInterface
     {
         return $this;
+    }
+    public function getSql(): string
+    {
+        return '';
+    }
+    public function getBindings(): array
+    {
+        return [];
+    }
+    public function fetchAll(?\Closure $callbackRow = null, ?string $fetchClass = null): array
+    {
+        return $this->pdoExt->fetchAll($this->getSql(), $this->getBindings(), $callbackRow, $fetchClass);
+    }
+    public function fetchOne(?string $fetchClass = null)
+    {
+        return $this->pdoExt->fetchOne($this->getSql(), $this->getBindings(), $fetchClass);
+    }
+    public function fetchOneColumn(string $columnName, ?string $defaultValue = null): ?string
+    {
+        return $this->pdoExt->fetchOneColumn($this->getSql(), $columnName, $this->getBindings(), $defaultValue);
     }
 }
