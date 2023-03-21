@@ -13,8 +13,8 @@ interface PdoExtQueryBuilderInterface
     public function addGroupBy($expression): PdoExtQueryBuilderInterface;
     public function having($condition): PdoExtQueryBuilderInterface;
     public function addHaving($condition): PdoExtQueryBuilderInterface;
-    public function orderBy($columns): PdoExtQueryBuilderInterface;
-    public function addOrderBy($columns): PdoExtQueryBuilderInterface;
+    public function orderBy($expression): PdoExtQueryBuilderInterface;
+    public function addOrderBy($expression): PdoExtQueryBuilderInterface;
     public function offset(int $offset): PdoExtQueryBuilderInterface;
     public function limit(int $limit): PdoExtQueryBuilderInterface;
 }

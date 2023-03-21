@@ -52,11 +52,11 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
     {
         return $this;
     }
-    public function orderBy($columns): PdoExtQueryBuilderInterface
+    public function orderBy($expression): PdoExtQueryBuilderInterface
     {
         return $this;
     }
-    public function addOrderBy($columns): PdoExtQueryBuilderInterface
+    public function addOrderBy($expression): PdoExtQueryBuilderInterface
     {
         return $this;
     }
