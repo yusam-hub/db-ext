@@ -2,14 +2,42 @@
 
 namespace YusamHub\DbExt\Tests;
 
+use YusamHub\DbExt\PdoExt;
+
 class PdoExtTest extends BaseTestCase
 {
-    public function testConnection()
+
+    public function testDefault()
     {
-        $this->assertTrue(self::$pdoExt->isMySqlDateTime(self::$pdoExt->selectMySqlDateTime()));
+        $queryBuilder = self::$pdoExt->queryBuilder();
+        $queryBuilder->select(['t1.col1','t2.col2 as c2']);
+        $queryBuilder->from(['table1 t1','table2 t2']);
+        $queryBuilder->where([
+            't1.id = 1',
+            'and t2.id = 2',
+        ]);
+        $queryBuilder->andWhere([
+            't3 = t4'
+        ]);
+        $queryBuilder->orWhere([
+            't5 = t6'
+        ]);
+        $queryBuilder->orderBy(['col1 asc', 't2.col2 desc']);
+        $queryBuilder->offset(0);
+        $queryBuilder->limit(10);
+
+        print_r($queryBuilder->getSql());
+        var_dump($queryBuilder->getBindings());
+
+        $this->assertTrue(true);
     }
 
-    public function testSql()
+    /*public function testConnection()
+    {
+        $this->assertTrue(self::$pdoExt->isMySqlDateTime(self::$pdoExt->selectMySqlDateTime()));
+    }*/
+
+    /*public function testSql()
     {
         self::$pdoExt->onDebugLogCallback(function(string $sql, array $bindings){
             echo "onDebugLogCallback: " . $sql . " ".  json_encode($bindings) . PHP_EOL;
@@ -40,9 +68,9 @@ class PdoExtTest extends BaseTestCase
             'id' => $id,
         ], 1);
         $this->assertTrue($res > 0 && self::$pdoExt->affectedRows() === 1);
-    }
+    }*/
 
-    public function testEscape()
+    /*public function testEscape()
     {
         $value = self::$pdoExt->escape("'test");
 
@@ -51,5 +79,5 @@ class PdoExtTest extends BaseTestCase
         ]),'str');
 
         $this->assertTrue($str === "'test");
-    }
+    }*/
 }

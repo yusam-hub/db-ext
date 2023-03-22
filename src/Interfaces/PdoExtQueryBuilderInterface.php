@@ -9,11 +9,8 @@ interface PdoExtQueryBuilderInterface
     function andWhere($condition): PdoExtQueryBuilderInterface;
     function orWhere($condition): PdoExtQueryBuilderInterface;
     function groupBy($expression): PdoExtQueryBuilderInterface;
-    function addGroupBy($expression): PdoExtQueryBuilderInterface;
     function having($condition): PdoExtQueryBuilderInterface;
-    function addHaving($condition): PdoExtQueryBuilderInterface;
     function orderBy($expression): PdoExtQueryBuilderInterface;
-    function addOrderBy($expression): PdoExtQueryBuilderInterface;
     function offset(int $offset): PdoExtQueryBuilderInterface;
     function limit(int $limit): PdoExtQueryBuilderInterface;
     function getSql(): string;
