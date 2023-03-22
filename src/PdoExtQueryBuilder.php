@@ -60,8 +60,22 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         } elseif($condition instanceof \Closure) {
             $where = (array) $condition();
         }
-        foreach($where as $w) {
-            $this->where[] = self::TAB . $w;
+        $operand = '';
+        foreach($where as $k => $v) {
+            if (!is_int($k)) {
+                $this->where[] = self::TAB. sprintf('%s%s = ?', $operand, $k);
+                if ($v instanceof \Closure) {
+                    $v = $v();
+                }
+                $this->bindings[] = $v;
+                if (empty($operand)) {
+                    $operand = 'and ';
+                }
+            } elseif (is_string($v)) {
+                $this->where[] = self::TAB . $v;
+            } elseif ($v instanceof \Closure) {
+                $this->where[] = self::TAB . $v();
+            }
         }
         $this->where[] = ')';
     }
@@ -137,7 +151,7 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         $sql[] = "from" . PHP_EOL . self::TAB . implode("," . PHP_EOL. self::TAB , $this->from) . PHP_EOL;
 
         if (!empty($this->where)) {
-            $sql[] = "where" . PHP_EOL . self::TAB . implode(PHP_EOL. self::TAB , $this->where) . PHP_EOL;
+            $sql[] = "where" . PHP_EOL . self::TAB . implode(PHP_EOL. self::TAB, $this->where) . PHP_EOL;
         }
 
         if (!empty($this->orderBy)) {

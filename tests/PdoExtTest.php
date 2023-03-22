@@ -13,14 +13,22 @@ class PdoExtTest extends BaseTestCase
         $queryBuilder->select(['t1.col1','t2.col2 as c2']);
         $queryBuilder->from(['table1 t1','table2 t2']);
         $queryBuilder->where([
+            'key1' => 'value1',
+            'key2' => function(){
+                return 'value2';
+            },
+        ]);
+        /*$queryBuilder->where([
             't1.id = 1',
             'and t2.id = 2',
-        ]);
+        ]);*/
         $queryBuilder->andWhere([
-            't3 = t4'
+            't3 = t4',
+            'and t3 = t4',
         ]);
         $queryBuilder->orWhere([
-            't5 = t6'
+            't5 = t6',
+            'and t3 = t4',
         ]);
         $queryBuilder->orderBy(['col1 asc', 't2.col2 desc']);
         $queryBuilder->offset(0);
