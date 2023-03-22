@@ -14,9 +14,14 @@ class PdoExtTest extends BaseTestCase
         $queryBuilder->from(['table1 t1','table2 t2']);
         $queryBuilder->where([
             'key1' => 'value1',
-            'key2' => function(){
-                return 'value2';
-            },
+            'key2' => '=:value2',
+            'key3' => '>=:value3',
+            'key4' => '>:value4',
+            'key5' => '<=:value5',
+            'key6' => '<:value6',
+            'key7' => 'like:value7',
+            'key8' => 'between:1,2',
+            'key9' => 'in:1,2,3,4,5,6',
         ]);
         /*$queryBuilder->where([
             't1.id = 1',

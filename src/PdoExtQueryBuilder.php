@@ -6,10 +6,6 @@ use YusamHub\DbExt\Interfaces\PdoExtQueryBuilderInterface;
 
 class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
 {
-    const TAB = "[:tab]";
-    const TAB_LEN = 2;
-    const SPACE = " ";
-    const SAFE_CHAR = "`";
     protected array $select = ["*"];
     protected array $from = [];
     protected array $where = [];
@@ -49,7 +45,19 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         }
         return $this;
     }
-    protected function whereAdd($condition, string $operand = ''): void
+    protected function fetchOperandFromValue(string $value, &$trimmedValue): string
+    {
+        foreach(self::OPERAND_LIST as $operand) {
+            if (str_starts_with(strtolower($value), $operand.":")) {
+                $trimmedValue = ltrim($value, $operand.":");
+                return $operand;
+            }
+        }
+        $trimmedValue = $value;
+        return '=';
+    }
+
+    protected function whereAdd($condition, string $groupCondition = ''): void
     {
         $where = [];
         if (is_string($condition)) {
@@ -59,29 +67,52 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         } elseif($condition instanceof \Closure) {
             $where = (array) $condition();
         }
-        $subOperand = '';
+        $subCondition = '';
         $subWhere = [];
         foreach($where as $k => $v) {
             if (!is_int($k)) {
                 if (!empty($v)) {
-                    $subWhere[] = self::TAB . sprintf('%s%s = ?', $subOperand, $k);
                     if ($v instanceof \Closure) {
                         $v = $v();
                     }
-                    $this->bindings[] = $v;
-                    if (empty($subOperand)) {
-                        $subOperand = 'and ';
+                    $operand = $this->fetchOperandFromValue($v, $v);
+                    if ($operand === self::OPERAND_BETWEEN) {
+                        $between = explode(",", $v);
+                        if (isset($between[0], $between[1])) {
+                            $subWhere[] = self::TAB . sprintf('%s%s between ? and ?', $subCondition, $k);
+                            $this->bindings[] = $between[0];
+                            $this->bindings[] = $between[1];
+                        }
+                    } elseif ($operand === self::OPERAND_IN) {
+                        $in = array_filter(explode(",", $v));
+                        $c = count($in);
+                        if ($c > 0 and $c <= 100) {
+                            $inString = [];
+                            for($i = 0; $i < $c; $i++) {
+                                $inString[] = '?';
+                                $this->bindings[] = $in[$i];
+                            }
+                            $subWhere[] = self::TAB . sprintf('%s%s in (%s)', $subCondition, $k, implode(",", $inString));
+                        }
+                    } else {
+                        $subWhere[] = self::TAB . sprintf('%s%s %s ?', $subCondition, $k, $operand);
+                        $this->bindings[] = $v;
+                    }
+                    if (empty($subCondition)) {
+                        $subCondition = 'and ';
                     }
                 }
-            } elseif (is_string($v)) {
-                $subWhere[] = self::TAB . $v;
-            } elseif ($v instanceof \Closure) {
-                $subWhere[] = self::TAB . $v();
+            } else {
+                if (is_string($v)) {
+                    $subWhere[] = self::TAB . $v;
+                } elseif ($v instanceof \Closure) {
+                    $subWhere[] = self::TAB . $v();
+                }
             }
         }
         if (!empty($subWhere)) {
-            if (!empty($operand)) {
-                $this->where[] = $operand;
+            if (!empty($groupCondition)) {
+                $this->where[] = $groupCondition;
             }
             $this->where[] = '(';
             foreach($subWhere as $w) {
