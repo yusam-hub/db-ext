@@ -129,6 +129,7 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
     }
     public function orderBy($expression): PdoExtQueryBuilderInterface
     {
+        $orderBy = [];
         if (is_string($expression)) {
             $orderBy = explode(",", $expression);
         } elseif(is_array($expression)) {
@@ -138,11 +139,13 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         }
         foreach($orderBy as $k => $v) {
             if (!is_int($k)) {
-                if (in_array(strtolower($v), ['','asc','desc'])) {
+                if (!empty($k) && in_array(strtolower($v), ['','asc','desc'])) {
                     $this->orderBy[] = trim($k . ' ' . $v);
                 }
-            } elseif (is_string($v)) {
-                $this->orderBy[] = $v;
+            } else {
+                if (!empty($v) && is_string($v)) {
+                    $this->orderBy[] = $v;
+                }
             }
         }
         return $this;
