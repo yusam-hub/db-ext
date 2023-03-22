@@ -22,8 +22,17 @@ class PdoExtTest extends BaseTestCase
             'key7' => 'lf:value7',
             'key71' => 'le:value71',
             'key72' => 'lc:value72',
-            'key8' => 'between:1,2',
+            'key8' => 'bw:1,2',
             'key9' => 'in:1,2,3,4,5,6',
+            'key27' => 'nlf:value7',
+            'key271' => 'nle:value71',
+            'key272' => 'nlc:value72',
+            'key28' => 'nbw:1,2',
+            'key29' => 'nin:1,2,3,4,5,6',
+            'key128' => 'null:',
+            'key129' => 'nnull:',
+
+
         ]);
         /*$queryBuilder->where([
             't1.id = 1',

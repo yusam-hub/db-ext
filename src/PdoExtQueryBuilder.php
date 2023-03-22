@@ -82,15 +82,19 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
                         $v = $v();
                     }
                     $operand = $this->fetchOperandFromValue($v, $v);
-                    if ($operand === self::OPERAND_BETWEEN) {
+                    if ($operand === self::OPERAND_BETWEEN || $operand === self::OPERAND_NOT_BETWEEN) {
                         $between = explode(",", $v);
                         if (isset($between[0], $between[1])) {
-                            $subWhere[] = self::TAB . sprintf('%s%s between ? and ?', $subCondition, $k);
+                            $not = '';
+                            if ($operand === self::OPERAND_NOT_BETWEEN) {
+                                $not = ' not';
+                            }
+                            $subWhere[] = self::TAB . sprintf('%s%s%s between ? and ?', $subCondition, $k, $not);
                             $this->bindings[] = $between[0];
                             $this->bindings[] = $between[1];
                         }
-                    } elseif ($operand === self::OPERAND_IN) {
-                        $in = array_filter(explode(",", $v));
+                    } elseif ($operand === self::OPERAND_IN || $operand === self::OPERAND_NOT_IN) {
+                        $in = array_filter(explode(",", $v), function($v){ return preg_match('/^([0-9]{1,20})$/', $v);});
                         $c = count($in);
                         if ($c > 0 and $c <= 100) {
                             $inString = [];
@@ -98,10 +102,17 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
                                 $inString[] = '?';
                                 $this->bindings[] = $in[$i];
                             }
-                            $subWhere[] = self::TAB . sprintf('%s%s in (%s)', $subCondition, $k, implode(",", $inString));
+                            $not = '';
+                            if ($operand === self::OPERAND_NOT_IN) {
+                                $not = ' not';
+                            }
+                            $subWhere[] = self::TAB . sprintf('%s%s%s in (%s)', $subCondition, $k, $not, implode(",", $inString));
                         }
-                    }  elseif ($operand === self::OPERAND_LIKE_FIRST || $operand === self::OPERAND_LIKE_END || $operand === self::OPERAND_LIKE_CONTAINS) {
-
+                    }  elseif (
+                        $operand === self::OPERAND_LIKE_FIRST || $operand === self::OPERAND_LIKE_END || $operand === self::OPERAND_LIKE_CONTAINS
+                        ||
+                        $operand === self::OPERAND_NOT_LIKE_FIRST || $operand === self::OPERAND_NOT_LIKE_END || $operand === self::OPERAND_NOT_LIKE_CONTAINS
+                    ) {
                         if ($operand === self::OPERAND_LIKE_FIRST) {
                             $subWhere[] = self::TAB . sprintf("%s%s like %s", $subCondition, $k, "CONCAT(?,'%')");
                             $this->bindings[] = $v;
@@ -111,6 +122,23 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
                         } elseif ($operand === self::OPERAND_LIKE_CONTAINS) {
                             $subWhere[] = self::TAB . sprintf("%s%s like %s", $subCondition, $k, "CONCAT('%',?,'%')");
                             $this->bindings[] = $v;
+                        } elseif ($operand === self::OPERAND_NOT_LIKE_FIRST) {
+                            $subWhere[] = self::TAB . sprintf("%s%s not like %s", $subCondition, $k, "CONCAT(?,'%')");
+                            $this->bindings[] = $v;
+                        } elseif ($operand === self::OPERAND_NOT_LIKE_END) {
+                            $subWhere[] = self::TAB . sprintf("%s%s not like %s", $subCondition, $k, "CONCAT('%',?)");
+                            $this->bindings[] = $v;
+                        } elseif ($operand === self::OPERAND_NOT_LIKE_CONTAINS) {
+                            $subWhere[] = self::TAB . sprintf("%s%s not like %s", $subCondition, $k, "CONCAT('%',?,'%')");
+                            $this->bindings[] = $v;
+                        }
+
+                    } elseif ($operand === self::OPERAND_NULL || $operand === self::OPERAND_NOT_NULL) {
+
+                        if ($operand === self::OPERAND_NOT_NULL) {
+                            $subWhere[] = self::TAB . sprintf('%s%s is not null', $subCondition, $k);
+                        } else {
+                            $subWhere[] = self::TAB . sprintf('%s%s is null', $subCondition, $k);
                         }
 
                     } else {
