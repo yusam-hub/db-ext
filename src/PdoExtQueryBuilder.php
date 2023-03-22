@@ -63,13 +63,15 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         $operand = '';
         foreach($where as $k => $v) {
             if (!is_int($k)) {
-                $this->where[] = self::TAB. sprintf('%s%s = ?', $operand, $k);
-                if ($v instanceof \Closure) {
-                    $v = $v();
-                }
-                $this->bindings[] = $v;
-                if (empty($operand)) {
-                    $operand = 'and ';
+                if (!empty($v)) {
+                    $this->where[] = self::TAB . sprintf('%s%s = ?', $operand, $k);
+                    if ($v instanceof \Closure) {
+                        $v = $v();
+                    }
+                    $this->bindings[] = $v;
+                    if (empty($operand)) {
+                        $operand = 'and ';
+                    }
                 }
             } elseif (is_string($v)) {
                 $this->where[] = self::TAB . $v;
