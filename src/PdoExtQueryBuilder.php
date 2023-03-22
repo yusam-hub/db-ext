@@ -49,9 +49,8 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         }
         return $this;
     }
-    protected function whereAdd($condition): void
+    protected function whereAdd($condition, string $operand = ''): void
     {
-        $this->where[] = '(';
         $where = [];
         if (is_string($condition)) {
             $where = explode(",", $condition);
@@ -60,26 +59,36 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         } elseif($condition instanceof \Closure) {
             $where = (array) $condition();
         }
-        $operand = '';
+        $subOperand = '';
+        $subWhere = [];
         foreach($where as $k => $v) {
             if (!is_int($k)) {
                 if (!empty($v)) {
-                    $this->where[] = self::TAB . sprintf('%s%s = ?', $operand, $k);
+                    $subWhere[] = self::TAB . sprintf('%s%s = ?', $subOperand, $k);
                     if ($v instanceof \Closure) {
                         $v = $v();
                     }
                     $this->bindings[] = $v;
-                    if (empty($operand)) {
-                        $operand = 'and ';
+                    if (empty($subOperand)) {
+                        $subOperand = 'and ';
                     }
                 }
             } elseif (is_string($v)) {
-                $this->where[] = self::TAB . $v;
+                $subWhere[] = self::TAB . $v;
             } elseif ($v instanceof \Closure) {
-                $this->where[] = self::TAB . $v();
+                $subWhere[] = self::TAB . $v();
             }
         }
-        $this->where[] = ')';
+        if (!empty($subWhere)) {
+            if (!empty($operand)) {
+                $this->where[] = $operand;
+            }
+            $this->where[] = '(';
+            foreach($subWhere as $w) {
+                $this->where[] = $w;
+            }
+            $this->where[] = ')';
+        }
     }
     public function where($condition): PdoExtQueryBuilderInterface
     {
@@ -88,14 +97,12 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
     }
     public function andWhere($condition): PdoExtQueryBuilderInterface
     {
-        $this->where[] = 'and';
-        $this->whereAdd($condition);
+        $this->whereAdd($condition, 'and');
         return $this;
     }
     public function orWhere($condition): PdoExtQueryBuilderInterface
     {
-        $this->where[] = 'or';
-        $this->whereAdd($condition);
+        $this->whereAdd($condition, 'or');
         return $this;
     }
     public function groupBy($expression): PdoExtQueryBuilderInterface
@@ -123,11 +130,20 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
     public function orderBy($expression): PdoExtQueryBuilderInterface
     {
         if (is_string($expression)) {
-            $this->orderBy = explode(",", $expression);
+            $orderBy = explode(",", $expression);
         } elseif(is_array($expression)) {
-            $this->orderBy = $expression;
+            $orderBy = $expression;
         } elseif($expression instanceof \Closure) {
-            $this->orderBy = (array) $expression();
+            $orderBy = (array) $expression();
+        }
+        foreach($orderBy as $k => $v) {
+            if (!is_int($k)) {
+                if (in_array(strtolower($v), ['','asc','desc'])) {
+                    $this->orderBy[] = trim($k . ' ' . $v);
+                }
+            } elseif (is_string($v)) {
+                $this->orderBy[] = $v;
+            }
         }
         return $this;
     }

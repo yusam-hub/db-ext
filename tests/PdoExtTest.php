@@ -30,7 +30,10 @@ class PdoExtTest extends BaseTestCase
             't5 = t6',
             'and t3 = t4',
         ]);
-        $queryBuilder->orderBy(['col1 asc', 't2.col2 desc']);
+        $queryBuilder->orderBy([
+            'col1' => '',
+            'col2' => 'desc',
+        ]);
         $queryBuilder->offset(0);
         $queryBuilder->limit(10);
 
