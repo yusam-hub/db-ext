@@ -3,6 +3,15 @@
 namespace YusamHub\DbExt\Interfaces;
 interface PdoExtQueryBuilderInterface
 {
+    const ORDER_BY_DEFAULT = '';
+    const ORDER_BY_ASC = 'asc';
+    const ORDER_BY_DESC = 'desc';
+    const ORDER_BY_LIST = [
+        self::ORDER_BY_DEFAULT,
+        self::ORDER_BY_ASC,
+        self::ORDER_BY_DESC,
+    ];
+
     function select($expression): PdoExtQueryBuilderInterface;
     function from($tableReferences): PdoExtQueryBuilderInterface;
     function where($condition): PdoExtQueryBuilderInterface;

@@ -139,7 +139,7 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         }
         foreach($orderBy as $k => $v) {
             if (!is_int($k)) {
-                if (!empty($k) && in_array(strtolower($v), ['','asc','desc'])) {
+                if (!empty($k) && in_array(strtolower($v), self::ORDER_BY_LIST)) {
                     $this->orderBy[] = trim($k . ' ' . $v);
                 }
             } else {
