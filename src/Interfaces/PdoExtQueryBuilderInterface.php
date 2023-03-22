@@ -12,7 +12,9 @@ interface PdoExtQueryBuilderInterface
     const OPERAND_MORE_EQUAL = '>=';
     const OPERAND_LESS_EQUAL = '<=';
     const OPERAND_LESS = '<';
-    const OPERAND_LIKE = 'like';
+    const OPERAND_LIKE_FIRST = 'lf';
+    const OPERAND_LIKE_END = 'le';
+    const OPERAND_LIKE_CONTAINS = 'lc';
     const OPERAND_BETWEEN = 'between';
     const OPERAND_IN = 'in';
     const OPERAND_LIST = [
@@ -21,7 +23,9 @@ interface PdoExtQueryBuilderInterface
         self::OPERAND_MORE_EQUAL,
         self::OPERAND_LESS_EQUAL,
         self::OPERAND_LESS,
-        self::OPERAND_LIKE,
+        self::OPERAND_LIKE_FIRST,
+        self::OPERAND_LIKE_END,
+        self::OPERAND_LIKE_CONTAINS,
         self::OPERAND_BETWEEN,
         self::OPERAND_IN,
     ];

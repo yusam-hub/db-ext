@@ -19,7 +19,9 @@ class PdoExtTest extends BaseTestCase
             'key4' => '>:value4',
             'key5' => '<=:value5',
             'key6' => '<:value6',
-            'key7' => 'like:value7',
+            'key7' => 'lf:value7',
+            'key71' => 'le:value71',
+            'key72' => 'lc:value72',
             'key8' => 'between:1,2',
             'key9' => 'in:1,2,3,4,5,6',
         ]);

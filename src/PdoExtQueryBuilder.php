@@ -57,6 +57,12 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
         return '=';
     }
 
+    protected function makeLikeFromValue(string $value): string
+    {
+
+        return $value;
+    }
+
     protected function whereAdd($condition, string $groupCondition = ''): void
     {
         $where = [];
@@ -94,6 +100,19 @@ class PdoExtQueryBuilder implements PdoExtQueryBuilderInterface
                             }
                             $subWhere[] = self::TAB . sprintf('%s%s in (%s)', $subCondition, $k, implode(",", $inString));
                         }
+                    }  elseif ($operand === self::OPERAND_LIKE_FIRST || $operand === self::OPERAND_LIKE_END || $operand === self::OPERAND_LIKE_CONTAINS) {
+
+                        if ($operand === self::OPERAND_LIKE_FIRST) {
+                            $subWhere[] = self::TAB . sprintf("%s%s like %s", $subCondition, $k, "CONCAT(?,'%')");
+                            $this->bindings[] = $v;
+                        } elseif ($operand === self::OPERAND_LIKE_END) {
+                            $subWhere[] = self::TAB . sprintf("%s%s like %s", $subCondition, $k, "CONCAT('%',?)");
+                            $this->bindings[] = $v;
+                        } elseif ($operand === self::OPERAND_LIKE_CONTAINS) {
+                            $subWhere[] = self::TAB . sprintf("%s%s like %s", $subCondition, $k, "CONCAT('%',?,'%')");
+                            $this->bindings[] = $v;
+                        }
+
                     } else {
                         $subWhere[] = self::TAB . sprintf('%s%s %s ?', $subCondition, $k, $operand);
                         $this->bindings[] = $v;
