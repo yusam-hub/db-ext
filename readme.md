@@ -23,7 +23,7 @@
     },
     "require": {
         ...
-        "yusam-hub/php-compatibility": "dev-master"
+        "yusam-hub/php-compatibility": "dev-master",
         "yusam-hub/db-ext": "dev-master"
         ...
     }
