@@ -144,19 +144,19 @@ class PdoExt implements PdoExtInterface
 
         if ($this->pdoStatement !== false && $this->pdoStatementExecute($this->lastBindings)) {
             if (is_null($callbackRow)) {
-                if (class_exists($fetchClass)) {
+                if (!is_null($fetchClass) && class_exists($fetchClass)) {
                     $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
                 }
-                $result = $this->pdoStatement->fetchAll(class_exists($fetchClass) ? \PDO::FETCH_CLASS: \PDO::FETCH_ASSOC);
+                $result = $this->pdoStatement->fetchAll(!is_null($fetchClass) && class_exists($fetchClass) ? \PDO::FETCH_CLASS: \PDO::FETCH_ASSOC);
                 if (is_array($result)) {
                     return $result;
                 }
             } else {
                 $rows = [];
-                if (class_exists($fetchClass)) {
+                if (!is_null($fetchClass) && class_exists($fetchClass)) {
                     $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
                 }
-                while($row = $this->pdoStatement->fetch(class_exists($fetchClass) ? \PDO::FETCH_CLASS: \PDO::FETCH_ASSOC)) {
+                while($row = $this->pdoStatement->fetch(!is_null($fetchClass) && class_exists($fetchClass) ? \PDO::FETCH_CLASS: \PDO::FETCH_ASSOC)) {
                     if (is_array($row) || is_object($row)) {
                         $rows[] = $callbackRow($row);
                     }
@@ -186,10 +186,10 @@ class PdoExt implements PdoExtInterface
         $this->pdoStatement = $this->pdoPrepare($this->lastSql);
 
         if ($this->pdoStatement !== false && $this->pdoStatementExecute($this->lastBindings)) {
-            if (class_exists($fetchClass)) {
+            if (!is_null($fetchClass) && class_exists($fetchClass)) {
                 $this->pdoStatement->setFetchMode(\PDO::FETCH_CLASS, $fetchClass);
             }
-            $row = $this->pdoStatement->fetch(class_exists($fetchClass) ? \PDO::FETCH_CLASS: \PDO::FETCH_ASSOC);
+            $row = $this->pdoStatement->fetch(!is_null($fetchClass) && class_exists($fetchClass) ? \PDO::FETCH_CLASS: \PDO::FETCH_ASSOC);
             if (is_array($row) || is_object($row)) {
                 return $row;
             }
