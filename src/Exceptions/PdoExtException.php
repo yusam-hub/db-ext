@@ -3,7 +3,7 @@
 namespace YusamHub\DbExt\Exceptions;
 
 use YusamHub\DbExt\Interfaces\PdoExtExceptionInterface;
-use YusamHub\DbExt\PdoExt;
+use YusamHub\DbExt\Interfaces\PdoExtInterface;
 
 class PdoExtException extends \RuntimeException implements PdoExtExceptionInterface
 {
@@ -15,12 +15,12 @@ class PdoExtException extends \RuntimeException implements PdoExtExceptionInterf
     protected array $pdoExtra;
 
     /**
-     * @param PdoExt $pdoExt
+     * @param PdoExtInterface $pdoExt
      * @param string $message
      * @param $code
      * @param \Throwable|null $previous
      */
-    public function __construct(PdoExt $pdoExt, string $message = "", $code = 0, ?\Throwable $previous = null)
+    public function __construct(PdoExtInterface $pdoExt, string $message = "", $code = 0, ?\Throwable $previous = null)
     {
         $this->lastSql = $pdoExt->getLastSql();
         $this->lastBindings = $pdoExt->getLastBindings();
