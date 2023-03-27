@@ -9,10 +9,10 @@ use YusamHub\DbExt\Traits\GetSetPdoExtKernelTrait;
 use YusamHub\DbExt\Traits\PdoExtModelTrait;
 
 /**
- * @method static PdoExtModelInterface|null findModel(PdoExtKernelInterface $pdoExt, $pk)
- * @method static PdoExtModelInterface findModelOrFail(PdoExtKernelInterface $pdoExt, $pk)
- * @method static PdoExtModelInterface|null findModelByAttributes(PdoExtKernelInterface $pdoExt, array $attributes)
- * @method static PdoExtModelInterface findModelByAttributesOrFail(PdoExtKernelInterface $pdoExt, array $attributes)
+ * @method static PdoExtModelInterface|null findModel(PdoExtKernelInterface $pdoExtKernel, $pk)
+ * @method static PdoExtModelInterface findModelOrFail(PdoExtKernelInterface $pdoExtKernel, $pk)
+ * @method static PdoExtModelInterface|null findModelByAttributes(PdoExtKernelInterface $pdoExtKernel, array $attributes)
+ * @method static PdoExtModelInterface findModelByAttributesOrFail(PdoExtKernelInterface $pdoExtKernel, array $attributes)
  */
 abstract class PdoExtModel implements PdoExtModelInterface
 {
