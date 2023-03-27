@@ -11,9 +11,8 @@ use YusamHub\DbExt\Interfaces\PdoExtModelInterface;
 trait PdoExtModelTrait
 {
     protected ?string $connectionName = null;
-    /**
-     * @var string
-     */
+    protected string $databaseName = '';
+
     protected string $tableName = '';
 
     protected array $savedAttributes = [];
@@ -26,7 +25,7 @@ trait PdoExtModelTrait
     public static function findModel(PdoExtKernelInterface $pdoExtKernel, $pk)
     {
         $model = new static();
-        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModel(get_class($model), $model->tableName, $model->primaryKey, $pk);
+        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModel(get_class($model), $model->databaseName, $model->tableName, $model->primaryKey, $pk);
         if ($newModel instanceof PdoExtModelInterface) {
             $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
@@ -38,7 +37,7 @@ trait PdoExtModelTrait
     public static function findModelByAttributes(PdoExtKernelInterface $pdoExtKernel, array $attributes)
     {
         $model = new static();
-        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModelByAttributes(get_class($model), $model->tableName, $attributes);
+        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModelByAttributes(get_class($model), $model->databaseName, $model->tableName, $attributes);
         if ($newModel instanceof PdoExtModelInterface) {
             $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
@@ -89,6 +88,7 @@ trait PdoExtModelTrait
             $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_INSERT);
 
             $primaryValue = $this->pdoExtKernel->pdoExt($this->connectionName)->insertReturnId(
+                $this->databaseName,
                 $this->tableName,
                 $this->getAttributes()
             );
@@ -124,6 +124,7 @@ trait PdoExtModelTrait
         $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_UPDATE);
 
         $result = $this->pdoExtKernel->pdoExt($this->connectionName)->update(
+            $this->databaseName,
             $this->tableName,
             $changedValues,
             [

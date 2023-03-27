@@ -72,7 +72,7 @@ class PdoExtTest extends BaseTestCase
         self::$pdoExt->onDebugLogCallback(function(string $sql, array $bindings){
             echo "onDebugLogCallback: " . $sql . " ".  json_encode($bindings) . PHP_EOL;
         });
-        $id = self::$pdoExt->insertReturnId('test', [
+        $id = self::$pdoExt->insertReturnId('','test', [
             'title' => 'title',
             'desc' => null,
         ]);
@@ -87,14 +87,14 @@ class PdoExtTest extends BaseTestCase
         $id = self::$pdoExt->fetchOneColumn("SELECT * FROM test",'id');
         $this->assertTrue(!is_null($id));
 
-        $res = self::$pdoExt->update('test', [
+        $res = self::$pdoExt->update('','test', [
             'desc' => 'test',
         ], [
             'id' => $id,
         ], 1);
         $this->assertTrue($res && self::$pdoExt->affectedRows() === 1);
 
-        $res = self::$pdoExt->delete('test', [
+        $res = self::$pdoExt->delete('','test', [
             'id' => $id,
         ], 1);
         $this->assertTrue($res > 0 && self::$pdoExt->affectedRows() === 1);

@@ -278,12 +278,27 @@ class PdoExt implements PdoExtInterface
     }
 
     /**
+     * @param string $databaseName
+     * @param string $tableName
+     * @return string
+     */
+    protected function concatNames(string $databaseName, string $tableName): string
+    {
+        $out = [
+            $databaseName,
+            $tableName
+        ];
+        return "`".implode("`,`", $out)."`";
+    }
+
+    /**
+     * @param string $databaseName
      * @param string $tableName
      * @param array $fieldValues
      * @param string $command
      * @return bool
      */
-    public function insert(string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT): bool
+    public function insert(string $databaseName, string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT): bool
     {
         $bindings = [];
         $fields = [];
@@ -294,42 +309,45 @@ class PdoExt implements PdoExtInterface
             $bindings[] = $value;
         }
 
-        $sql = $command . ' INTO `' . $tableName . '`  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
+        $sql = $command . ' INTO ' . $this->concatNames($databaseName, $tableName) . '  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
 
         return $this->exec($sql, $bindings);
     }
 
     /**
+     * @param string $databaseName
      * @param string $tableName
      * @param array $fieldValues
      * @return int|null
      */
-    public function insertReturnId(string $tableName, array $fieldValues): ?int
+    public function insertReturnId(string $databaseName, string $tableName, array $fieldValues): ?int
     {
-        if ($this->insert($tableName, $fieldValues)) {
+        if ($this->insert($databaseName, $tableName, $fieldValues)) {
             return $this->lastInsertId();
         }
         return null;
     }
 
     /**
+     * @param string $databaseName
      * @param string $tableName
      * @param array $fieldValues
      * @return bool
      */
-    public function replace(string $tableName, array $fieldValues): bool
+    public function replace(string $databaseName, string $tableName, array $fieldValues): bool
     {
-        return $this->insert($tableName, $fieldValues, self::COMMAND_REPLACE);
+        return $this->insert($databaseName, $tableName, $fieldValues, self::COMMAND_REPLACE);
     }
 
     /**
+     * @param string $databaseName
      * @param string $tableName
      * @param array $fieldValues
      * @param string|array|null $whereStatementOrWhereArray
      * @param int|null $limit
      * @return bool
      */
-    public function update(string $tableName, array $fieldValues, $whereStatementOrWhereArray = null, ?int $limit = null): bool
+    public function update(string $databaseName, string $tableName, array $fieldValues, $whereStatementOrWhereArray = null, ?int $limit = null): bool
     {
         $bindings = [];
         $sets = [];
@@ -348,7 +366,7 @@ class PdoExt implements PdoExtInterface
             $where[] = $whereStatementOrWhereArray;
         }
 
-        $sql = 'UPDATE `' . $tableName . "` SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        $sql = 'UPDATE ' . $this->concatNames($databaseName, $tableName) . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
 
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
@@ -358,12 +376,13 @@ class PdoExt implements PdoExtInterface
     }
 
     /**
+     * @param string $databaseName
      * @param string $tableName
      * @param string|array|null $whereStatementOrWhereArray
      * @param int|null $limit
      * @return bool
      */
-    public function delete(string $tableName, $whereStatementOrWhereArray = null, ?int $limit = null): bool
+    public function delete(string $databaseName, string $tableName, $whereStatementOrWhereArray = null, ?int $limit = null): bool
     {
         $bindings = [];
 
@@ -377,7 +396,7 @@ class PdoExt implements PdoExtInterface
             $where[] = $whereStatementOrWhereArray;
         }
 
-        $sql = 'DELETE FROM ' . $tableName . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        $sql = 'DELETE FROM ' . $this->concatNames($databaseName, $tableName) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
 
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
@@ -388,23 +407,25 @@ class PdoExt implements PdoExtInterface
 
     /**
      * @param string $classModel
+     * @param string $databaseName
      * @param string $tableName
      * @param string $pkKey
      * @param $pkVal
      * @return object|null
      */
-    public function findModel(string $classModel, string $tableName, string $pkKey, $pkVal): ?object
+    public function findModel(string $classModel, string $databaseName, string $tableName, string $pkKey, $pkVal): ?object
     {
-        return $this->findModelByAttributes($classModel, $tableName, [$pkKey => $pkVal]);
+        return $this->findModelByAttributes($classModel, $databaseName, $tableName, [$pkKey => $pkVal]);
     }
 
     /**
      * @param string $classModel
+     * @param string $databaseName
      * @param string $tableName
      * @param array $attributes
      * @return object|null
      */
-    public function findModelByAttributes(string $classModel, string $tableName, array $attributes): ?object
+    public function findModelByAttributes(string $classModel, string $databaseName, string $tableName, array $attributes): ?object
     {
         $where = [];
         $bindings = [];
@@ -413,7 +434,7 @@ class PdoExt implements PdoExtInterface
             $bindings[] = $value;
         }
         return $this->fetchOne(
-            strtr("SELECT * FROM `" . $tableName . "`:where LIMIT 0,1", [
+            strtr("SELECT * FROM " . $this->concatNames($databaseName, $tableName) . ":where LIMIT 0,1", [
                 ':where' => !empty($where) ? ' WHERE '. implode('AND', $where) : '',
             ]),
             $bindings,

@@ -20,17 +20,17 @@ interface PdoExtInterface
     function escape(?string $value, bool $trim = true): string;
     function exec(string $sql, array $bindings = []): bool;
 
-    function insert(string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT): bool;
-    function insertReturnId(string $tableName, array $fieldValues): ?int;
-    function replace(string $tableName, array $fieldValues): bool;
-    function update(string $tableName, array $fieldValues, $whereStatementOrWhereArray = null, ?int $limit = null): bool;
-    function delete(string $tableName, $whereStatementOrWhereArray = null, ?int $limit = null): bool;
+    function insert(string $databaseName, string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT): bool;
+    function insertReturnId(string $databaseName, string $tableName, array $fieldValues): ?int;
+    function replace(string $databaseName, string $tableName, array $fieldValues): bool;
+    function update(string $databaseName, string $tableName, array $fieldValues, $whereStatementOrWhereArray = null, ?int $limit = null): bool;
+    function delete(string $databaseName, string $tableName, $whereStatementOrWhereArray = null, ?int $limit = null): bool;
 
     function lastInsertId(): ?int;
     function affectedRows(): int;
 
-    function findModel(string $classModel, string $tableName, string $pkKey, $pkVal): ?object;
-    function findModelByAttributes(string $classModel, string $tableName, array $attributes): ?object;
+    function findModel(string $classModel, string $databaseName, string $tableName, string $pkKey, $pkVal): ?object;
+    function findModelByAttributes(string $classModel, string $databaseName, string $tableName, array $attributes): ?object;
     function beginTransaction(): bool;
     function commitTransaction(): bool;
     function rollBackTransaction(): bool;
