@@ -282,13 +282,13 @@ class PdoExt implements PdoExtInterface
      * @param string $tableName
      * @return string
      */
-    protected function concatNames(string $databaseName, string $tableName): string
+    public function concatDatabaseNameTableName(string $databaseName, string $tableName): string
     {
         $out = [
             $databaseName,
             $tableName
         ];
-        return "`".implode("`,`", $out)."`";
+        return "`".implode("`.`", $out)."`";
     }
 
     /**
@@ -309,7 +309,7 @@ class PdoExt implements PdoExtInterface
             $bindings[] = $value;
         }
 
-        $sql = $command . ' INTO ' . $this->concatNames($databaseName, $tableName) . '  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
+        $sql = $command . ' INTO ' . $this->concatDatabaseNameTableName($databaseName, $tableName) . '  (' . implode(', ', $fields) . ') VALUES(' . implode(',', $values).')';
 
         return $this->exec($sql, $bindings);
     }
@@ -366,7 +366,7 @@ class PdoExt implements PdoExtInterface
             $where[] = $whereStatementOrWhereArray;
         }
 
-        $sql = 'UPDATE ' . $this->concatNames($databaseName, $tableName) . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        $sql = 'UPDATE ' . $this->concatDatabaseNameTableName($databaseName, $tableName) . " SET " . implode(", ", $sets) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
 
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
@@ -396,7 +396,7 @@ class PdoExt implements PdoExtInterface
             $where[] = $whereStatementOrWhereArray;
         }
 
-        $sql = 'DELETE FROM ' . $this->concatNames($databaseName, $tableName) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
+        $sql = 'DELETE FROM ' . $this->concatDatabaseNameTableName($databaseName, $tableName) . ((!empty($where)) ? " WHERE " . implode(" AND ", $where) : '');
 
         if (is_int($limit)) {
             $sql .= " LIMIT " . $limit;
@@ -434,7 +434,7 @@ class PdoExt implements PdoExtInterface
             $bindings[] = $value;
         }
         return $this->fetchOne(
-            strtr("SELECT * FROM " . $this->concatNames($databaseName, $tableName) . ":where LIMIT 0,1", [
+            strtr("SELECT * FROM " . $this->concatDatabaseNameTableName($databaseName, $tableName) . ":where LIMIT 0,1", [
                 ':where' => !empty($where) ? ' WHERE '. implode('AND', $where) : '',
             ]),
             $bindings,

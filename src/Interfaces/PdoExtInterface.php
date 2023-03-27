@@ -20,6 +20,7 @@ interface PdoExtInterface
     function escape(?string $value, bool $trim = true): string;
     function exec(string $sql, array $bindings = []): bool;
 
+    function concatDatabaseNameTableName(string $databaseName, string $tableName): string;
     function insert(string $databaseName, string $tableName, array $fieldValues, string $command = self::COMMAND_INSERT): bool;
     function insertReturnId(string $databaseName, string $tableName, array $fieldValues): ?int;
     function replace(string $databaseName, string $tableName, array $fieldValues): bool;
