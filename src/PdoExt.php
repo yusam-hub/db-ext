@@ -24,6 +24,8 @@ class PdoExt implements PdoExtInterface
      */
     protected $pdoStatement = false;
 
+    protected int $transactionDepth = 0;
+
     /**
      * @param \PDO $pdo
      */
@@ -464,6 +466,49 @@ class PdoExt implements PdoExtInterface
     public function rollBackTransaction(): bool
     {
         return $this->pdo->rollBack();
+    }
+
+    /**
+     * @return bool
+     */
+    public function beginTransactionDepth(): bool
+    {
+        if ($this->transactionDepth === 0) {
+            $this->transactionDepth++;
+            return $this->pdo->beginTransaction();
+        }
+        $this->transactionDepth++;
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function commitTransactionDepth(): bool
+    {
+        $this->transactionDepth--;
+        if ($this->transactionDepth === 0) {
+            return $this->pdo->commit();
+        }
+        if ($this->transactionDepth < 0) {
+            $this->transactionDepth = 0;
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function rollBackTransactionDepth(): bool
+    {
+        $this->transactionDepth--;
+        if ($this->transactionDepth === 0) {
+            return $this->pdo->rollBack();
+        }
+        if ($this->transactionDepth < 0) {
+            $this->transactionDepth = 0;
+        }
+        return false;
     }
 
     /**
