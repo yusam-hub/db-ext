@@ -286,10 +286,11 @@ class PdoExt implements PdoExtInterface
      */
     public function concatDatabaseNameTableName(string $databaseName, string $tableName): string
     {
-        $out = [
-            $databaseName,
-            $tableName
-        ];
+        $out = [];
+        if (!empty($databaseName)) {
+            $out[] = $databaseName;
+        }
+        $out[] = $tableName;
         return "`".implode("`.`", $out)."`";
     }
 
