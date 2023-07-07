@@ -59,28 +59,28 @@ class PdoHelper
     }
 
     /**
-     * @param \Exception $e
+     * @param $e
      * @return bool
      */
-    public static function checkPDOError1927(\Exception $e): bool
+    public static function checkPDOError1927($e): bool
     {
         return $e instanceof \PDOException && isset($e->errorInfo[1]) && $e->errorInfo[1] === 1927;
     }
 
     /**
-     * @param \Exception $e
+     * @param $e
      * @return bool
      */
-    public static function checkPDOGoneAway2006(\Exception $e): bool
+    public static function checkPDOGoneAway2006($e): bool
     {
         return $e instanceof \PDOException && isset($e->errorInfo[1]) && $e->errorInfo[1] === 2006;
     }
 
     /**
-     * @param \Exception $e
+     * @param $e
      * @return bool
      */
-    public static function checkPDOGoneAway1062(\Exception $e): bool
+    public static function checkPDOGoneAway1062($e): bool
     {
         return $e instanceof \PDOException && isset($e->errorInfo[1]) && $e->errorInfo[1] === 1062;
     }
