@@ -25,7 +25,9 @@ trait PdoExtModelTrait
     public static function findModel(PdoExtKernelInterface $pdoExtKernel, $pk)
     {
         $model = new static();
-        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModel(get_class($model), $model->databaseName, $model->tableName, $model->primaryKey, $pk);
+        $newModel = $pdoExtKernel
+            ->pdoExt($model->getConnectionName())
+            ->findModel(get_class($model), $model->getDatabaseName(), $model->getTableName(), $model->primaryKey, $pk);
         if ($newModel instanceof PdoExtModelInterface) {
             $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
@@ -37,7 +39,9 @@ trait PdoExtModelTrait
     public static function findModelByAttributes(PdoExtKernelInterface $pdoExtKernel, array $attributes)
     {
         $model = new static();
-        $newModel = $pdoExtKernel->pdoExt($model->connectionName)->findModelByAttributes(get_class($model), $model->databaseName, $model->tableName, $attributes);
+        $newModel = $pdoExtKernel
+            ->pdoExt($model->getConnectionName())
+            ->findModelByAttributes(get_class($model), $model->getDatabaseName(), $model->getTableName(), $attributes);
         if ($newModel instanceof PdoExtModelInterface) {
             $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
@@ -87,9 +91,9 @@ trait PdoExtModelTrait
 
             $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_INSERT);
 
-            $primaryValue = $this->pdoExtKernel->pdoExt($this->connectionName)->insertReturnId(
-                $this->databaseName,
-                $this->tableName,
+            $primaryValue = $this->pdoExtKernel->pdoExt($this->getConnectionName())->insertReturnId(
+                $this->getDatabaseName(),
+                $this->getTableName(),
                 $this->getAttributes()
             );
 
@@ -97,7 +101,7 @@ trait PdoExtModelTrait
                 $this->{$this->primaryKey} = $primaryValue;
             }
 
-            if ($this->pdoExtKernel->pdoExt($this->connectionName)->affectedRows() === 1) {
+            if ($this->pdoExtKernel->pdoExt($this->getConnectionName())->affectedRows() === 1) {
 
                 $this->savedAttributes = $this->getAttributes();
 
@@ -123,9 +127,9 @@ trait PdoExtModelTrait
 
         $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_UPDATE);
 
-        $result = $this->pdoExtKernel->pdoExt($this->connectionName)->update(
-            $this->databaseName,
-            $this->tableName,
+        $result = $this->pdoExtKernel->pdoExt($this->getConnectionName())->update(
+            $this->getDatabaseName(),
+            $this->getTableName(),
             $changedValues,
             [
                 $this->primaryKey => $this->{$this->primaryKey}
@@ -169,5 +173,20 @@ trait PdoExtModelTrait
     protected function triggerAfterLoad(): void
     {
         $this->savedAttributes = $this->getAttributes();
+    }
+
+    protected function getConnectionName(): ?string
+    {
+        return $this->connectionName;
+    }
+
+    protected function getDatabaseName(): string
+    {
+        return $this->databaseName;
+    }
+
+    protected function getTableName(): string
+    {
+        return $this->tableName;
     }
 }
