@@ -78,28 +78,31 @@ abstract class Migrations
             $queries = explode(";", $content);
 
             $this->beginTransaction();
-
-            foreach($queries as $query) {
-                $query = trim($query);
-                if (!empty($query)) {
-                    $scriptNumber++;
-                    $this->echoLine("INFO", sprintf('%s. %s',  str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
-                    try {
+            try {
+                foreach ($queries as $query) {
+                    $query = trim($query);
+                    if (!empty($query)) {
+                        $scriptNumber++;
+                        $this->echoLine("INFO", sprintf('%s. %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $query));
                         $this->query($query);
                         $this->echoLine();
-                    } catch (\Throwable $e) {
-                        $this->echoLine("ERROR", sprintf('%s. FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $e->getMessage(), basename($file)));
-                        $this->echoLine();
-                        $this->rollBackTransaction();
-                        return;
                     }
                 }
+
+                file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
+
+                $this->commitTransaction();
+
+            } catch (\Throwable $e) {
+
+                $this->echoLine("ERROR", sprintf('%s. FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $e->getMessage(), basename($file)));
+
+                $this->echoLine();
+
+                $this->rollBackTransaction();
             }
 
-            file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
-
-            $this->commitTransaction();
-        }
+        }//end for
     }
 
     protected function getMigrationFiles(): array
