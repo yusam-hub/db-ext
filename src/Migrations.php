@@ -78,6 +78,7 @@ abstract class Migrations
             $queries = explode(";", $content);
 
             $this->beginTransaction();
+
             try {
                 foreach ($queries as $query) {
                     $query = trim($query);
@@ -91,15 +92,14 @@ abstract class Migrations
 
                 file_put_contents($this->storageFile, basename($file) . PHP_EOL, FILE_APPEND);
 
-                $this->commitTransaction();
-
             } catch (\Throwable $e) {
 
                 $this->echoLine("ERROR", sprintf('%s. FAIL (%s) in file %s', str_pad($scriptNumber, 8, '0', STR_PAD_LEFT), $e->getMessage(), basename($file)));
 
                 $this->echoLine();
 
-                $this->rollBackTransaction();
+                throw $e;
+
             }
 
         }//end for
