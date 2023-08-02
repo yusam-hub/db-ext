@@ -245,6 +245,7 @@ class PdoExt implements PdoExtInterface
     {
         $result = $this->pdo->lastInsertId();
         if ($result !== false) {
+            $this->debugLog('LAST_INSERT_ID', [$result]);
             return intval($result);
         }
         return null;
