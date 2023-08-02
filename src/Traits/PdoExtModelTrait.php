@@ -88,7 +88,7 @@ trait PdoExtModelTrait
          */
         $pk = $this->getPrimaryKey();
 
-        if (empty($this->{$pk})) {
+        if (is_null($this->{$pk})) {
 
             $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_INSERT);
 
