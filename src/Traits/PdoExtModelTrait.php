@@ -3,7 +3,6 @@
 namespace YusamHub\DbExt\Traits;
 
 use YusamHub\DbExt\Exceptions\PdoExtModelException;
-use YusamHub\DbExt\Interfaces\PdoExtInterface;
 use YusamHub\DbExt\Interfaces\PdoExtKernelInterface;
 use YusamHub\DbExt\Interfaces\PdoExtModelExceptionInterface;
 use YusamHub\DbExt\Interfaces\PdoExtModelInterface;
@@ -20,14 +19,14 @@ trait PdoExtModelTrait
     /**
      * @var string|int
      */
-    protected $primaryKey = '';
+    protected $primaryKey = 'id';
 
     public static function findModel(PdoExtKernelInterface $pdoExtKernel, $pk)
     {
         $model = new static();
         $newModel = $pdoExtKernel
             ->pdoExt($model->getConnectionName())
-            ->findModel(get_class($model), $model->getDatabaseName(), $model->getTableName(), $model->primaryKey, $pk);
+            ->findModel(get_class($model), $model->getDatabaseName(), $model->getTableName(), $model->getPrimaryKey(), $pk);
         if ($newModel instanceof PdoExtModelInterface) {
             $newModel->setPdoExtKernel($pdoExtKernel);
             $newModel->triggerAfterLoad();
@@ -55,7 +54,7 @@ trait PdoExtModelTrait
         $model = static::findModel($pdoExtKernel, $pk);
         if (is_null($model)) {
             throw new PdoExtModelException([
-                (new static())->primaryKey => $pk,
+                (new static())->getPrimaryKey() => $pk,
             ], PdoExtModelExceptionInterface::EXCEPTION_MESSAGE_MODEL_NOT_FOUND);
         }
         return $model;
@@ -87,7 +86,9 @@ trait PdoExtModelTrait
         /**
          * INSERT
          */
-        if (empty($this->{$this->primaryKey})) {
+        $pk = $this->getPrimaryKey();
+
+        if (empty($this->{$pk})) {
 
             $this->triggerBeforeSave(self::TRIGGER_TYPE_SAVE_ON_INSERT);
 
@@ -98,7 +99,7 @@ trait PdoExtModelTrait
             );
 
             if (!empty($primaryValue)) {
-                $this->{$this->primaryKey} = $primaryValue;
+                $this->{$pk} = $primaryValue;
             }
 
             if ($this->pdoExtKernel->pdoExt($this->getConnectionName())->affectedRows() === 1) {
@@ -132,7 +133,7 @@ trait PdoExtModelTrait
             $this->getTableName(),
             $changedValues,
             [
-                $this->primaryKey => $this->{$this->primaryKey}
+                $this->getPrimaryKey() => $this->{$pk}
             ],
             1
         );
@@ -149,8 +150,8 @@ trait PdoExtModelTrait
     public function getChangedAttributes(): array
     {
         $changedValues = array_diff_assoc($this->getAttributes(), $this->savedAttributes);
-        if (isset($changedValues[$this->primaryKey])) {
-            unset($changedValues[$this->primaryKey]);
+        if (isset($changedValues[$this->getPrimaryKey()])) {
+            unset($changedValues[$this->getPrimaryKey()]);
         }
         return $changedValues;
     }
@@ -188,5 +189,10 @@ trait PdoExtModelTrait
     protected function getTableName(): string
     {
         return $this->tableName;
+    }
+
+    protected function getPrimaryKey(): string
+    {
+        return $this->primaryKey;
     }
 }
