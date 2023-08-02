@@ -147,6 +147,14 @@ trait PdoExtModelTrait
         return $result;
     }
 
+    public function saveOrFail(): void
+    {
+        $result = $this->save();
+        if (!$result) {
+            throw new PdoExtModelException([],'Error while saving model');
+        }
+    }
+
     public function getChangedAttributes(): array
     {
         $changedValues = array_diff_assoc($this->getAttributes(), $this->savedAttributes);
