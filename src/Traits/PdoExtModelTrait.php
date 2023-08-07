@@ -83,6 +83,8 @@ trait PdoExtModelTrait
 
     public function save(): bool
     {
+        $this->triggerBeforeMethodSave();
+
         /**
          * INSERT
          */
@@ -167,6 +169,11 @@ trait PdoExtModelTrait
     public function isChangedAttributes(): bool
     {
         return !empty($this->getChangedAttributes());
+    }
+
+    protected function triggerBeforeMethodSave(): void
+    {
+
     }
 
     protected function triggerBeforeSave(int $triggerType): void
