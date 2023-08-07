@@ -439,7 +439,7 @@ class PdoExt implements PdoExtInterface
         }
         return $this->fetchOne(
             strtr("SELECT * FROM " . $this->concatDatabaseNameTableName($databaseName, $tableName) . ":where LIMIT 0,1", [
-                ':where' => !empty($where) ? ' WHERE '. implode('AND', $where) : '',
+                ':where' => !empty($where) ? " WHERE ". implode(" AND ", $where) : '',
             ]),
             $bindings,
             $classModel
