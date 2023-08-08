@@ -27,6 +27,17 @@ abstract class PdoExtKernel implements PdoExtKernelInterface
         return $this->pdoExtConnections[$connectionName] = $this->createPdoExt($connectionName);
     }
 
+    public function pdoExtClose(?string $connectionName = null): void
+    {
+        if (is_null($connectionName)) {
+            $connectionName = $this->getDefaultConnectionName();
+        }
+
+        if (isset($this->pdoExtConnections[$connectionName])) {
+            unset($this->pdoExtConnections[$connectionName]);
+        }
+    }
+
     abstract public function createPdoExt(string $connectionName): PdoExtInterface;
 
     /**
